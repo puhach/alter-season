@@ -1,5 +1,5 @@
 from dataloader import get_data_loader
-
+from display import imshow
 
 
 # Create train and test dataloaders for images from the two domains X and Y
@@ -9,6 +9,3 @@ trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', 
 
 batch = next(iter(trainloader_X))
 print(batch)
-#parser = argparse.ArgumentParser()
-#args = parser.parse_args()
-#print(args)
