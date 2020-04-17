@@ -1,6 +1,7 @@
 from dataloader import get_data_loader
 from display import imshow
-from preprocess import scale
+#from preprocess import scale
+from helpers import scale
 
 # Create train and test dataloaders for images from the two domains X and Y
 # image_type = directory names for our data
