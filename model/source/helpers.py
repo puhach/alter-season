@@ -1,3 +1,5 @@
+import torch.nn as nn
+import torch.nn.functional as F
 
 
 def scale(x, feature_range=(-1, 1)):
@@ -9,3 +11,20 @@ def scale(x, feature_range=(-1, 1)):
     min, max = feature_range
     x = x * (max - min) + min
     return x
+
+
+
+
+def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm=True):
+    """Creates a convolutional layer with optional batch normalization.
+    """
+    layers = []
+    # TODO: ? Shouldn't bias be set to NOT batch_norm instead of always being False ? 
+    conv_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, 
+                           kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
+    
+    layers.append(conv_layer)
+
+    if batch_norm:
+        layers.append(nn.BatchNorm2d(out_channels))
+    return nn.Sequential(*layers)
