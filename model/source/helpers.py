@@ -28,3 +28,17 @@ def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm
     if batch_norm:
         layers.append(nn.BatchNorm2d(out_channels))
     return nn.Sequential(*layers)
+
+
+# helper deconv function
+def deconv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm=True):
+    """Creates a transpose convolutional layer, with optional batch normalization.
+    """
+    layers = []
+    # append transpose conv layer
+    # ?? Shouldn't we set bias to NOT batch_norm instead of always being False ?
+    layers.append(nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=False))
+    # optional batch norm layer
+    if batch_norm:
+        layers.append(nn.BatchNorm2d(out_channels))
+    return nn.Sequential(*layers)
