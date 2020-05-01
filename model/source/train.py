@@ -1,5 +1,6 @@
 from dataloader import get_data_loader
 from display import imshow
+from cyclegan import create_model
 #from preprocess import scale
 from helpers import scale
 
@@ -20,3 +21,7 @@ scaled_img = scale(img)
 
 print('Scaled min: ', scaled_img.min())
 print('Scaled max: ', scaled_img.max())
+
+# call the function to get models
+G_XtoY, G_YtoX, D_X, D_Y = create_model()
+
