@@ -2,7 +2,7 @@ from dataloader import get_data_loader
 from display import imshow
 from cyclegan import create_model
 #from preprocess import scale
-from helpers import scale
+from helpers import scale, print_models
 
 # Create train and test dataloaders for images from the two domains X and Y
 # image_type = directory names for our data
@@ -22,6 +22,8 @@ scaled_img = scale(img)
 print('Scaled min: ', scaled_img.min())
 print('Scaled max: ', scaled_img.max())
 
-# call the function to get models
+# instantiate the complete model
 G_XtoY, G_YtoX, D_X, D_Y = create_model()
 
+# print the model architecture
+print_models(G_XtoY, G_YtoX, D_X, D_Y)
