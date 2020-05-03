@@ -42,3 +42,28 @@ def deconv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_no
     if batch_norm:
         layers.append(nn.BatchNorm2d(out_channels))
     return nn.Sequential(*layers)
+
+
+# helper function for printing the model architecture
+def print_models(G_XtoY, G_YtoX, D_X, D_Y):
+    """Prints model information for the generators and discriminators.
+    """
+    print("                     G_XtoY                    ")
+    print("-----------------------------------------------")
+    print(G_XtoY)
+    print()
+
+    print("                     G_YtoX                    ")
+    print("-----------------------------------------------")
+    print(G_YtoX)
+    print()
+
+    print("                      D_X                      ")
+    print("-----------------------------------------------")
+    print(D_X)
+    print()
+
+    print("                      D_Y                      ")
+    print("-----------------------------------------------")
+    print(D_Y)
+    print()

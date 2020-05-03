@@ -1,5 +1,6 @@
 from discriminator import Discriminator
 from generator import CycleGenerator
+import torch
 
 def create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6):
     """Builds the generators and discriminators."""
@@ -24,3 +25,5 @@ def create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6):
         print('Only CPU available.')
 
     return G_XtoY, G_YtoX, D_X, D_Y
+
+

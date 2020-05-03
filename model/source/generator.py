@@ -1,6 +1,6 @@
 import torch.nn as nn
 import torch.nn.functional as F
-from helpers import conv
+from helpers import conv, deconv
 
 class ResidualBlock(nn.Module):
     """Defines a residual block.
