@@ -30,3 +30,7 @@ def create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6):
 def real_mse_loss(D_out):
     # how close is the produced output to being "real"?
     return torch.mean((D_out - 1)**2)
+
+def fake_mse_loss(D_out):
+    # how close is the produced output to being "false"?
+    return torch.mean((D_out - 0)**2)
