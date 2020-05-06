@@ -1,6 +1,6 @@
 from dataloader import get_data_loader
 from display import imshow
-from cyclegan import create_model, real_mse_loss, fake_mse_loss
+from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss
 #from preprocess import scale
 from helpers import scale, print_models
 

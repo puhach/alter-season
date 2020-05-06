@@ -34,3 +34,9 @@ def real_mse_loss(D_out):
 def fake_mse_loss(D_out):
     # how close is the produced output to being "false"?
     return torch.mean((D_out - 0)**2)
+
+def cycle_consistency_loss(real_im, reconstructed_im, lambda_weight):
+    # calculate the reconstruction loss 
+    loss = torch.mean(torch.abs(real_im - reconstructed_im))
+    # return weighted loss
+    return lambda_weight*loss
