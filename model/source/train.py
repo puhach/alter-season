@@ -3,6 +3,8 @@ from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss
 #from preprocess import scale
 from helpers import scale, print_models
+import torch.optim as optim
+
 
 # Create train and test dataloaders for images from the two domains X and Y
 # image_type = directory names for our data
@@ -27,3 +29,11 @@ G_XtoY, G_YtoX, D_X, D_Y = create_model()
 
 # print the model architecture
 print_models(G_XtoY, G_YtoX, D_X, D_Y)
+
+
+
+
+# hyperparams for Adam optimizers
+lr=0.0002
+beta1=0.5
+beta2=0.999 
