@@ -4,10 +4,13 @@ import torch.nn.functional as F
 import os
 import numpy as np
 
+
 def scale(x, feature_range=(-1, 1)):
-    ''' Scale takes in an image x and returns that image, scaled
-       with a feature_range of pixel values from -1 to 1. 
-       This function assumes that the input x is already scaled from 0-255.'''
+    """
+    Scale takes in an image x and returns that image, scaled
+    with a feature_range of pixel values from -1 to 1. 
+    This function assumes that the input x is already scaled from 0-255.
+    """
     
     # scale from 0-1 to feature_range
     min, max = feature_range
@@ -18,7 +21,8 @@ def scale(x, feature_range=(-1, 1)):
 
 
 def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm=True):
-    """Creates a convolutional layer with optional batch normalization.
+    """
+    Creates a convolutional layer with optional batch normalization.
     """
     layers = []
     # TODO: ? Shouldn't bias be set to NOT batch_norm instead of always being False ? 
@@ -34,7 +38,8 @@ def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm
 
 # helper deconv function
 def deconv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm=True):
-    """Creates a transpose convolutional layer, with optional batch normalization.
+    """
+    Creates a transpose convolutional layer, with optional batch normalization.
     """
     layers = []
     # append transpose conv layer
@@ -105,3 +110,16 @@ def merge_images(sources, targets, batch_size=16):
     merged = merged.transpose(1, 2, 0)
     return merged
     
+
+def to_data(x):
+    """
+    Converts a tensor to numpy array.
+    """
+
+    if torch.cuda.is_available():
+        x = x.cpu()
+    x = x.data.numpy()
+    x = ((x +1)*255 / (2)).astype(np.uint8) # rescale to 0-255
+    return x
+
+
