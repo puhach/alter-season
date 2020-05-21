@@ -123,3 +123,26 @@ def to_data(x):
     return x
 
 
+def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='samples_cyclegan'):
+    """
+    Saves samples from both generators X->Y and Y->X.
+    """
+
+    # move input data to correct device
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+
+    fake_X = G_YtoX(fixed_Y.to(device))
+    fake_Y = G_XtoY(fixed_X.to(device))
+    
+    X, fake_X = to_data(fixed_X), to_data(fake_X)
+    Y, fake_Y = to_data(fixed_Y), to_data(fake_Y)
+    
+    merged = merge_images(X, fake_Y, batch_size)
+    path = os.path.join(sample_dir, 'sample-{:06d}-X-Y.png'.format(iteration))
+    scipy.misc.imsave(path, merged)
+    print('Saved {}'.format(path))
+    
+    merged = merge_images(Y, fake_X, batch_size)
+    path = os.path.join(sample_dir, 'sample-{:06d}-Y-X.png'.format(iteration))
+    scipy.misc.imsave(path, merged)
+    print('Saved {}'.format(path))
