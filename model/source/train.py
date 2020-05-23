@@ -161,6 +161,11 @@ def train(train_dataloader_X, train_dataloader_Y,
 trainloader_X = get_data_loader(image_type='summer', image_dir='../data/train', shuffle=True)
 trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', shuffle=True)
 
+# TODO: remove test loaders later
+testloader_X = get_data_loader(image_type='summer', image_dir='../data/test', shuffle=False)
+testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', shuffle=False)
+
+
 batch = next(iter(trainloader_X))
 print(batch)
 
@@ -194,3 +199,4 @@ g_optimizer = optim.Adam(g_params, lr, [beta1, beta2])
 d_x_optimizer = optim.Adam(D_X.parameters(), lr, [beta1, beta2])
 d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
+losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, n_epochs=1000)
