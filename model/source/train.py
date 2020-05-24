@@ -3,6 +3,7 @@ from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss
 #from preprocess import scale
 from helpers import scale, print_models, save_samples, checkpoint
+import torch
 import torch.optim as optim
 
 
@@ -15,13 +16,13 @@ def train(train_dataloader_X, train_dataloader_Y,
     # keep track of losses over time
     losses = []
 
-    test_iter_X = iter(test_dataloader_X)
-    test_iter_Y = iter(test_dataloader_Y)
+    #test_iter_X = iter(test_dataloader_X)
+    #test_iter_Y = iter(test_dataloader_Y)
 
     # Get some fixed data from domains X and Y for sampling. These are images that are held
     # constant throughout training, that allow us to inspect the model's performance.
-    fixed_X = test_iter_X.next()[0]
-    fixed_Y = test_iter_Y.next()[0]
+    fixed_X = next(iter(test_dataloader_X))[0] #test_iter_X.next()[0]
+    fixed_Y = next(iter(test_dataloader_Y))[0] #test_iter_Y.next()[0]
     fixed_X = scale(fixed_X) # make sure to scale to a range -1 to 1
     fixed_Y = scale(fixed_Y)
 
@@ -29,6 +30,7 @@ def train(train_dataloader_X, train_dataloader_Y,
     iter_X = iter(train_dataloader_X)
     iter_Y = iter(train_dataloader_Y)
     batches_per_epoch = min(len(iter_X), len(iter_Y))
+    #tmp = min(len(train_dataloader_X), len(train_dataloader_Y))
 
     for epoch in range(1, n_epochs+1):
 
