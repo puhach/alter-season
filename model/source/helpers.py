@@ -86,12 +86,13 @@ def save_instance(instance, file_path):
     }, file_path)    
 
 #def checkpoint(iteration, G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir='checkpoints_cyclegan'):
-def save_checkpoint(iteration, G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir):
+def save_checkpoint(epoch, G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir):
     """
     Saves the parameters of all generators and discriminators.
     """
 
-    os.makedirs(checkpoint_dir, exist_ok=True)
+    epoch_dir = f'{epoch: <{4}}'
+    os.makedirs(os.path.join(checkpoint_dir, epoch_dir), exist_ok=True)
     #checkpoint_dir = os.path.dirname(filepath)
     #if checkpoint_dir != '':
     #    os.makedirs(checkpoint_dir, exist_ok=True)
@@ -139,6 +140,8 @@ def save_checkpoint(iteration, G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir):
     #torch.save(G_YtoX.state_dict(), G_YtoX_path)
     #torch.save(D_X.state_dict(), D_X_path)
     #torch.save(D_Y.state_dict(), D_Y_path)
+
+
 
 
 
