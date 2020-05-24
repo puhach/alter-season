@@ -2,7 +2,7 @@ from dataloader import get_data_loader
 from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss
 #from preprocess import scale
-from helpers import scale, print_models, save_samples, checkpoint
+from helpers import scale, print_models, save_samples, save_checkpoint
 import torch
 import torch.optim as optim
 
@@ -45,6 +45,7 @@ def train(train_dataloader_X, train_dataloader_Y,
         images_Y, _ = iter_Y.next()
         images_Y = scale(images_Y)
         
+        # TODO: add a device parameter
         # move images to GPU if available (otherwise stay on CPU)
         device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         images_X = images_X.to(device)
@@ -152,7 +153,7 @@ def train(train_dataloader_X, train_dataloader_Y,
 #         checkpoint_every=1000
 #         # Save the model parameters
 #         if epoch % checkpoint_every == 0:
-#             checkpoint(epoch, G_XtoY, G_YtoX, D_X, D_Y)
+#             save_checkpoint(epoch, G_XtoY, G_YtoX, D_X, D_Y, 'checkpoints')
 
     return losses
 
