@@ -2,10 +2,11 @@ from dataloader import get_data_loader
 from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss
 #from preprocess import scale
-from helpers import scale, print_models, save_samples, save_checkpoint
+from helpers import scale, print_models, save_samples
+from checkpoint import save_checkpoint, load_checkpoint
 import torch
 import torch.optim as optim
-
+import os
 
 
 def train(train_dataloader_X, train_dataloader_Y, 
@@ -149,11 +150,13 @@ def train(train_dataloader_X, train_dataloader_Y,
             G_YtoX.train()
             G_XtoY.train()
 
-        # uncomment these lines, if you want to save your model
-#         checkpoint_every=1000
-#         # Save the model parameters
-#         if epoch % checkpoint_every == 0:
-#             save_checkpoint(epoch, G_XtoY, G_YtoX, D_X, D_Y, 'checkpoints')
+        
+        checkpoint_every=1000
+        # Save the model parameters
+        if epoch % checkpoint_every == 0:
+            save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, 
+#                'checkpoints')
+                os.path.join('checkpoints', f'{epoch: <{4}}'))
 
     return losses
 
@@ -203,3 +206,13 @@ d_x_optimizer = optim.Adam(D_X.parameters(), lr, [beta1, beta2])
 d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, n_epochs=1000)
+
+
+# TODO: test loading from the checkpoint
+#G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('checkpoints', device=device)
+
+# Export the generators
+#sm_g_x_to_y = torch.jit.script(G_XtoY)
+#sm_g_x_to_y.save(os.path.join('artifact', 'summer_to_winter.sm'))
+#sm_g_y_to_x = torch.jit.script(G_YtoX)
+#sm_g_y_to_x.save(os.path.join('artifact', 'winter_to_summer.sm'))
