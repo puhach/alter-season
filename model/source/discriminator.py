@@ -7,6 +7,9 @@ class Discriminator(nn.Module):
     def __init__(self, conv_dim=64):
         super(Discriminator, self).__init__()
 
+        # Save the initialization parameters
+        self.conv_dim = conv_dim
+
         # Define all convolutional layers
         self.conv1 = conv(in_channels=3, out_channels=conv_dim, 
                           kernel_size=4, stride=2, padding=1, batch_norm=False)
@@ -29,3 +32,6 @@ class Discriminator(nn.Module):
         #x = self.conv5(x) # (512,8,8) -> (1, 1, 1)
         x = F.sigmoid(self.conv5(x))
         return x
+
+    def get_init_params(self):
+        return (self.conv_dim)
