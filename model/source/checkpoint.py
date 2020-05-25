@@ -73,3 +73,21 @@ def save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, checkpoint_dir):
     #torch.save(G_YtoX.state_dict(), G_YtoX_path)
     #torch.save(D_X.state_dict(), D_X_path)
     #torch.save(D_Y.state_dict(), D_Y_path)
+
+def load_instance(instance_class, file_path, device):
+    model_info = torch.load(file_path, map_location=device)
+    init_params = model_info['init_params']
+    instance = instance_class(*init_params)
+    instance = instance.to(device)
+    return instance
+
+def load_checkpoint(checkpoint_dir, device):
+    """
+    Load all discriminators and generators. 
+    """
+    G_XtoY = load_instance(CycleGenerator, os.path.join(checkpoint_dir, 'g_x_to_y.pt'), device)
+    G_YtoX = load_instance(CycleGenerator, os.path.join(checkpoint_dir, 'g_y_to_x.pt'), device)
+    D_X = load_instance(Discriminator, os.path.join(checkpoint_dir, 'd_x.pt'), device)
+    D_Y = load_instance(Discriminator, os.path.join(checkpoint_dir, 'd_y.pt'), device)
+    return G_XtoY, G_YtoX, D_X, D_Y
+
