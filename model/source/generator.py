@@ -30,19 +30,23 @@ class CycleGenerator(nn.Module):
     def __init__(self, conv_dim=64, n_res_blocks=6):
         super(CycleGenerator, self).__init__()
 
-        # 1. Define the encoder part of the generator
+        # Save the initialization parameters
+        self.conv_dim = conv_dim
+        self.n_res_blocks = n_res_blocks
+
+        # Define the encoder part of the generator
         self.conv1 = conv(in_channels=3, out_channels=conv_dim, kernel_size=4, stride=2, padding=1, batch_norm=True)
         self.conv2 = conv(conv_dim, conv_dim*2, 4, 2, 1)
         self.conv3 = conv(conv_dim*2, conv_dim*4, 4, 2, 1)
 
-        # 2. Define the resnet part of the generator
+        # Define the resnet part of the generator
         resnet_layers = []
         for i in range(n_res_blocks):
             resnet_layers.append(ResidualBlock(conv_dim*4))
             
         self.resnet = nn.Sequential(*resnet_layers)
 
-        # 3. Define the decoder part of the generator
+        # Define the decoder part of the generator
         self.deconv1 = deconv(in_channels=conv_dim*4, out_channels=conv_dim*2, 
                               kernel_size=4, stride=2, padding=1, batch_norm=True)
         self.deconv2 = deconv(in_channels=conv_dim*2, out_channels=conv_dim, 
@@ -60,3 +64,6 @@ class CycleGenerator(nn.Module):
         x = F.relu(self.deconv2(x)) # (128, 32, 32) -> (64, 64, 64)
         x = F.tanh(self.deconv3(x)) # (64, 64, 64) -> (3, 128, 128)
         return x
+
+    def get_init_params(self):
+        return (self.conv_dim, self.n_res_blocks)
