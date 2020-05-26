@@ -94,7 +94,7 @@ def merge_images(sources, targets):
     rows = int(np.sqrt(batch_size))
     cols = int(math.ceil(batch_size / rows))
     #merged = np.zeros([3, row*h, row*w*2])
-    grid = np.zeros([channels, rows*h, cols*w*2])
+    grid = np.zeros([channels, rows*h, cols*w*2], dtype=np.uint8)
     for idx, (s, t) in enumerate(zip(sources, targets)):
         #i = idx // row
         #j = idx % row
