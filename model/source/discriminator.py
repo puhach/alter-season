@@ -34,4 +34,4 @@ class Discriminator(nn.Module):
         return x
 
     def get_init_params(self):
-        return (self.conv_dim)
+        return (self.conv_dim, )
