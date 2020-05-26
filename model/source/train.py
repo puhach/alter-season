@@ -12,7 +12,7 @@ import os
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
         device, n_epochs=1000, 
-        print_every=10, checkpoint_every = 10):
+        print_every=10, checkpoint_every=10):
     
     
     # keep track of losses over time
@@ -142,18 +142,18 @@ def train(train_dataloader_X, train_dataloader_Y,
                     epoch, n_epochs, d_x_loss.item(), d_y_loss.item(), g_total_loss.item()))
 
             
-        sample_every=100
+        sample_every=2
         # Save the generated samples
         if epoch % sample_every == 0:
             G_YtoX.eval() # set generators to eval mode for sample generation
             G_XtoY.eval()
-            save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16)
+            save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, device=device, batch_size=16, sample_dir='../samples')
             G_YtoX.train()
             G_XtoY.train()
 
         
         # Save the model parameters
-        if epoch % checkpoint_every == 0:
+        if epoch % checkpoint_every == 0 or epoch == n_epochs:
             save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, 
                 '../checkpoints')
 #                os.path.join('checkpoints', f'{epoch: <{4}}'))
@@ -163,13 +163,16 @@ def train(train_dataloader_X, train_dataloader_Y,
 
 
 # Create train and test dataloaders for images from the two domains X and Y
-# image_type = directory names for our data
-trainloader_X = get_data_loader(image_type='summer', image_dir='../data/train', shuffle=True)
-trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', shuffle=True)
+
+image_size = 128
+batch_size = 16
+
+trainloader_X = get_data_loader(image_type='summer', image_dir='../data/train', shuffle=True, image_size=image_size, batch_size=batch_size)
+trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', shuffle=True, image_size=image_size, batch_size=batch_size)
 
 # TODO: remove test loaders later
-testloader_X = get_data_loader(image_type='summer', image_dir='../data/test', shuffle=False)
-testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', shuffle=False)
+testloader_X = get_data_loader(image_type='summer', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
+testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 
 
 batch = next(iter(trainloader_X))
@@ -211,11 +214,15 @@ losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y,
                 device=device, n_epochs=10, checkpoint_every=3)
 
 
-# TODO: test loading from the checkpoint
-#G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('checkpoints', device=device)
+# Load the checkpoint
+G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device=device)
 
 # Export the generators
-#sm_g_x_to_y = torch.jit.script(G_XtoY)
-#sm_g_x_to_y.save(os.path.join('../artifact', 'summer_to_winter.sm'))
-#sm_g_y_to_x = torch.jit.script(G_YtoX)
-#sm_g_y_to_x.save(os.path.join('../artifact', 'winter_to_summer.sm'))
+sm_g_x_to_y = torch.jit.script(G_XtoY)
+sm_g_x_to_y.save(os.path.join('../artifact', 'summer_to_winter.sm'))
+sm_g_y_to_x = torch.jit.script(G_YtoX)
+sm_g_y_to_x.save(os.path.join('../artifact', 'winter_to_summer.sm'))
+
+# Test the script modules
+test_y = sm_g_x_to_y(scaled_img.unsqueeze(0))
+print(test_y.shape)
