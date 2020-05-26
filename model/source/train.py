@@ -11,7 +11,8 @@ import os
 
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
-        n_epochs=1000, print_every=10, checkpoint_every = 10):
+        device, n_epochs=1000, 
+        print_every=10, checkpoint_every = 10):
     
     
     # keep track of losses over time
@@ -46,9 +47,9 @@ def train(train_dataloader_X, train_dataloader_Y,
         images_Y, _ = iter_Y.next()
         images_Y = scale(images_Y)
         
-        # TODO: add a device parameter
-        # move images to GPU if available (otherwise stay on CPU)
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        # move images to GPU or CPU depending on what is passed in the device parameter
+        ## move images to GPU if available (otherwise stay on CPU)
+        ##device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         images_X = images_X.to(device)
         images_Y = images_Y.to(device)
 
@@ -204,8 +205,10 @@ g_optimizer = optim.Adam(g_params, lr, [beta1, beta2])
 d_x_optimizer = optim.Adam(D_X.parameters(), lr, [beta1, beta2])
 d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
-losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, n_epochs=10, checkpoint_every=3)
+losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
+                device=device, n_epochs=10, checkpoint_every=3)
 
 
 # TODO: test loading from the checkpoint
