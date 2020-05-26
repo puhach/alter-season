@@ -11,7 +11,7 @@ import os
 
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
-        n_epochs=1000, print_every=10):
+        n_epochs=1000, print_every=10, checkpoint_every = 10):
     
     
     # keep track of losses over time
@@ -151,12 +151,11 @@ def train(train_dataloader_X, train_dataloader_Y,
             G_XtoY.train()
 
         
-        checkpoint_every=1000
         # Save the model parameters
         if epoch % checkpoint_every == 0:
             save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, 
-#                'checkpoints')
-                os.path.join('checkpoints', f'{epoch: <{4}}'))
+                '../checkpoints')
+#                os.path.join('checkpoints', f'{epoch: <{4}}'))
 
     return losses
 
@@ -205,7 +204,8 @@ g_optimizer = optim.Adam(g_params, lr, [beta1, beta2])
 d_x_optimizer = optim.Adam(D_X.parameters(), lr, [beta1, beta2])
 d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
-losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, n_epochs=1000)
+
+losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, n_epochs=10, checkpoint_every=3)
 
 
 # TODO: test loading from the checkpoint
@@ -213,6 +213,6 @@ losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, n_epoch
 
 # Export the generators
 #sm_g_x_to_y = torch.jit.script(G_XtoY)
-#sm_g_x_to_y.save(os.path.join('artifact', 'summer_to_winter.sm'))
+#sm_g_x_to_y.save(os.path.join('../artifact', 'summer_to_winter.sm'))
 #sm_g_y_to_x = torch.jit.script(G_YtoX)
-#sm_g_y_to_x.save(os.path.join('artifact', 'winter_to_summer.sm'))
+#sm_g_y_to_x.save(os.path.join('../artifact', 'winter_to_summer.sm'))
