@@ -120,8 +120,7 @@ def to_data(x):
     return x
 
 
-def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, 
-                batch_size=16, sample_dir='samples'):
+def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='samples'):
     """
     Saves samples from both generators X->Y and Y->X.
     """

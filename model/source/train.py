@@ -149,13 +149,14 @@ def train(train_dataloader_X, train_dataloader_Y,
                     epoch, n_epochs, d_x_loss.item(), d_y_loss.item(), g_total_loss.item()))
 
             
-        sample_every=20
+        # TODO: add a sample_every parameter
+        sample_every=2
         # Save the generated samples
         if epoch % sample_every == 0:
             G_YtoX.eval() # set generators to eval mode for sample generation
             G_XtoY.eval()
             #save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, device=device, batch_size=16, sample_dir='../samples')
-            save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='../samples')
+            save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='../samples')
             G_YtoX.train()
             G_XtoY.train()
 
