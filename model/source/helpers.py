@@ -121,16 +121,18 @@ def to_data(x):
 
 
 def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, 
-                device, batch_size=16, sample_dir='samples'):
+                batch_size=16, sample_dir='samples'):
     """
     Saves samples from both generators X->Y and Y->X.
     """
 
-    # TODO: don't move here, pass the moved tensor instead
-    # move input data to the correct device
-    fake_X = G_YtoX(fixed_Y.to(device))
-    fake_Y = G_XtoY(fixed_X.to(device))
-    
+    ## TODO: don't move here, pass the moved tensor instead
+    ## move input data to the correct device
+    #fake_X = G_YtoX(fixed_Y.to(device))
+    #fake_Y = G_XtoY(fixed_X.to(device))    
+    fake_X = G_YtoX(fixed_Y)
+    fake_Y = G_XtoY(fixed_X)
+
     X, fake_X = to_data(fixed_X), to_data(fake_X)
     Y, fake_Y = to_data(fixed_Y), to_data(fake_Y)
     

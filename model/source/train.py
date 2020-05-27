@@ -11,7 +11,7 @@ import os
 
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
-        device, n_epochs=1000, 
+        device, n_epochs, 
         print_every=10, checkpoint_every=10):
     
     
@@ -25,8 +25,11 @@ def train(train_dataloader_X, train_dataloader_Y,
     # constant throughout training, that allow us to inspect the model's performance.
     fixed_X = next(iter(test_dataloader_X))[0] #test_iter_X.next()[0]
     fixed_Y = next(iter(test_dataloader_Y))[0] #test_iter_Y.next()[0]
-    fixed_X = scale(fixed_X) # make sure to scale to a range -1 to 1
-    fixed_Y = scale(fixed_Y)
+    # make sure to scale to a range -1 to 1
+    #fixed_X = scale(fixed_X) 
+    #fixed_Y = scale(fixed_Y)
+    fixed_X = scale(fixed_X.to(device))
+    fixed_Y = scale(fixed_Y.to(device))
 
     # batches per epoch
     iter_X = iter(train_dataloader_X)
@@ -41,17 +44,21 @@ def train(train_dataloader_X, train_dataloader_Y,
             iter_X = iter(train_dataloader_X)
             iter_Y = iter(train_dataloader_Y)
 
-        images_X, _ = iter_X.next()
-        images_X = scale(images_X) # make sure to scale to a range -1 to 1
-
-        images_Y, _ = iter_Y.next()
-        images_Y = scale(images_Y)
-        
         # move images to GPU or CPU depending on what is passed in the device parameter
-        ## move images to GPU if available (otherwise stay on CPU)
-        ##device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-        images_X = images_X.to(device)
-        images_Y = images_Y.to(device)
+        # make sure to scale to a range -1 to 1
+        images_X, _ = next(iter_X)
+        images_X = scale(images_X.to(device))
+        #images_X, _ = iter_X.next()
+        #images_X = scale(images_X) 
+
+        #images_Y, _ = iter_Y.next()
+        images_Y, _ = next(iter_Y)
+        #images_Y = scale(images_Y)        
+        images_Y = scale(images_Y.to(device))
+
+        # move images to GPU or CPU depending on what is passed in the device parameter
+        #images_X = images_X.to(device)
+        #images_Y = images_Y.to(device)
 
 
         # ============================================
@@ -142,12 +149,13 @@ def train(train_dataloader_X, train_dataloader_Y,
                     epoch, n_epochs, d_x_loss.item(), d_y_loss.item(), g_total_loss.item()))
 
             
-        sample_every=2
+        sample_every=20
         # Save the generated samples
         if epoch % sample_every == 0:
             G_YtoX.eval() # set generators to eval mode for sample generation
             G_XtoY.eval()
-            save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, device=device, batch_size=16, sample_dir='../samples')
+            #save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, device=device, batch_size=16, sample_dir='../samples')
+            save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, batch_size=16, sample_dir='../samples')
             G_YtoX.train()
             G_XtoY.train()
 
@@ -174,6 +182,7 @@ trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', 
 testloader_X = get_data_loader(image_type='summer', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 
+# TODO: remove this section (it is needed only for testing)
 
 batch = next(iter(trainloader_X))
 print(batch)
@@ -211,7 +220,7 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=10, checkpoint_every=3)
+                device=device, n_epochs=1000, checkpoint_every=3)
 
 
 # Load the checkpoint
