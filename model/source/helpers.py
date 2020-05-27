@@ -17,7 +17,8 @@ def scale(x, feature_range=(-1, 1)):
     
     # scale from 0-1 to feature_range
     min, max = feature_range
-    x = x * (max - min) + min
+    #x = x * (max - min) + min
+    x = torch.add(torch.mul(x, (max-min)), min)
     return x
 
 
@@ -111,6 +112,7 @@ def to_data(x):
     Converts a tensor to numpy array.
     """
 
+    # TODO: try to scale back in pytorch, then convert to numpy
     if torch.cuda.is_available():
         x = x.cpu()
     x = x.data.numpy()
@@ -124,6 +126,7 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY,
     Saves samples from both generators X->Y and Y->X.
     """
 
+    # TODO: don't move here, pass the moved tensor instead
     # move input data to the correct device
     fake_X = G_YtoX(fixed_Y.to(device))
     fake_Y = G_XtoY(fixed_X.to(device))
