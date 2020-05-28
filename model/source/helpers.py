@@ -15,6 +15,7 @@ def scale(x, feature_range=(-1, 1)):
     This function assumes that the input x is already scaled from 0-255.
     """
     
+    # TODO: consider using in-place operations
     # scale from 0-1 to feature_range
     min, max = feature_range
     #x = x * (max - min) + min
@@ -112,11 +113,18 @@ def to_data(x):
     Converts a tensor to numpy array.
     """
 
-    # TODO: try to scale back in pytorch, then convert to numpy
-    if torch.cuda.is_available():
+    # scale back in pytorch, then convert to numpy    
+    x = x.add(1).mul_(255).div_(2)
+    
+    if x.is_cuda:
         x = x.cpu()
-    x = x.data.numpy()
-    x = ((x + 1)*255 / (2)).astype(np.uint8) # rescale to 0-255
+
+    x = x.data.numpy().astype(np.uint8)
+
+    #if torch.cuda.is_available():
+    #    x = x.cpu()
+    #x = x.data.numpy()
+    #x = ((x + 1)*255 / (2)).astype(np.uint8) # rescale to 0-255
     return x
 
 
