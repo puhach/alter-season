@@ -108,7 +108,7 @@ def merge_images(sources, targets):
     return grid
     
 
-def to_data(x):
+def tensor_to_image(x):
     """
     Converts a tensor to numpy array.
     """
@@ -140,8 +140,8 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='sample
     fake_X = G_YtoX(fixed_Y)
     fake_Y = G_XtoY(fixed_X)
 
-    X, fake_X = to_data(fixed_X), to_data(fake_X)
-    Y, fake_Y = to_data(fixed_Y), to_data(fake_Y)
+    X, fake_X = tensor_to_image(fixed_X), tensor_to_image(fake_X)
+    Y, fake_Y = tensor_to_image(fixed_Y), tensor_to_image(fake_Y)
     
     #grid_xy = merge_images(X, fake_Y, batch_size)
     grid_xy = merge_images(X, fake_Y)
