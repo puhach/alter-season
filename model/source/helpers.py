@@ -15,11 +15,11 @@ def scale(x, feature_range=(-1, 1)):
     This function assumes that the input x is already scaled from 0-255.
     """
     
-    # TODO: consider using in-place operations
     # scale from 0-1 to feature_range
     min, max = feature_range
     #x = x * (max - min) + min
-    x = torch.add(torch.mul(x, (max-min)), min)
+    #x = torch.add(torch.mul(x, (max-min)), min)
+    x = x.mul(max-min).add_(min)
     return x
 
 
