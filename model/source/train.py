@@ -195,29 +195,14 @@ trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', 
 testloader_X = get_data_loader(image_type='summer', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 
-# TODO: remove this section (it is needed only for testing)
-
-batch = next(iter(trainloader_X))
-print(batch)
-
-img = batch[0][0]
-
-print('Min: ', img.min())
-print('Max: ', img.max())
-
-scaled_img = scale(img)
-
-print('Scaled min: ', scaled_img.min())
-print('Scaled max: ', scaled_img.max())
-
 
 #device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # instantiate the complete model
 G_XtoY, G_YtoX, D_X, D_Y = create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device=device)
 
-# print the model architecture
-print_models(G_XtoY, G_YtoX, D_X, D_Y)
+## print the model architecture
+#print_models(G_XtoY, G_YtoX, D_X, D_Y)
 
 
 
@@ -236,18 +221,31 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=1000, checkpoint_every=3)
+                device=device, n_epochs=10, checkpoint_every=3)
 
 
 # Load the checkpoint
 G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device=device)
 
 # Export the generators
+print('Creating script modules...')
 sm_g_x_to_y = torch.jit.script(G_XtoY)
 sm_g_x_to_y.save(os.path.join('../artifact', 'summer_to_winter.sm'))
 sm_g_y_to_x = torch.jit.script(G_YtoX)
 sm_g_y_to_x.save(os.path.join('../artifact', 'winter_to_summer.sm'))
 
+
 # Test the script modules
+print('Testing the script modules...')
+
+batch = next(iter(testloader_X))
+scaled_img = scale(batch[0][0])
 test_y = sm_g_x_to_y(scaled_img.unsqueeze(0))
-print(test_y.shape)
+print('x -> y:', test_y.shape)
+
+batch = next(iter(testloader_Y))
+scaled_img = scale(batch[0][0])
+test_x = sm_g_y_to_x(scaled_img.unsqueeze(0))
+print('y -> x:', test_x.shape)
+
+print('Done!')
