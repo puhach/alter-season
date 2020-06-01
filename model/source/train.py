@@ -175,11 +175,14 @@ def train(train_dataloader_X, train_dataloader_Y,
 parser = argparse.ArgumentParser(description='Alter season CycleGAN training script')
 parser.add_argument('--device', type=str, default='cpu',
                     help='The device to use for training. Defaults to CPU.')
+parser.add_argument('--epochs', type=int, required=True, 
+                    help='The number of epochs to train for.')                    
 # TODO: add other params
 
 args = parser.parse_args()
 
 device = args.device
+epochs = args.epochs
 
 print(f'Using {device} for training')
 
@@ -221,7 +224,7 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=10, checkpoint_every=3)
+                device=device, n_epochs=epochs, checkpoint_every=3)
 
 
 # Load the checkpoint
