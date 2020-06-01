@@ -7,6 +7,7 @@ from checkpoint import save_checkpoint, load_checkpoint
 import torch
 import torch.optim as optim
 import os
+import argparse
 
 
 def train(train_dataloader_X, train_dataloader_Y, 
@@ -171,6 +172,17 @@ def train(train_dataloader_X, train_dataloader_Y,
 
 
 
+parser = argparse.ArgumentParser(description='Alter season CycleGAN training script')
+parser.add_argument('--device', type=str, default='cpu',
+                    help='The device to use for training. Defaults to CPU.')
+# TODO: add other params
+
+args = parser.parse_args()
+
+device = args.device
+
+print(f'Using {device} for training')
+
 # Create train and test dataloaders for images from the two domains X and Y
 
 image_size = 128
@@ -199,7 +211,7 @@ print('Scaled min: ', scaled_img.min())
 print('Scaled max: ', scaled_img.max())
 
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+#device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # instantiate the complete model
 G_XtoY, G_YtoX, D_X, D_Y = create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device=device)

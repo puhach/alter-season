@@ -15,14 +15,12 @@ def create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device='cpu'):
     D_X = Discriminator(d_conv_dim)
     D_Y = Discriminator(d_conv_dim)
 
-    # TODO: add a device parameter
-    
     # move models to GPU, if specified
     G_XtoY.to(device)
     G_YtoX.to(device)
     D_X.to(device)
     D_Y.to(device)
-    
+
     # move models to GPU, if available
     #if torch.cuda.is_available():
     #    device = torch.device("cuda:0")
