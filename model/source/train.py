@@ -198,8 +198,11 @@ scaled_img = scale(img)
 print('Scaled min: ', scaled_img.min())
 print('Scaled max: ', scaled_img.max())
 
+
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 # instantiate the complete model
-G_XtoY, G_YtoX, D_X, D_Y = create_model()
+G_XtoY, G_YtoX, D_X, D_Y = create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device=device)
 
 # print the model architecture
 print_models(G_XtoY, G_YtoX, D_X, D_Y)
@@ -218,7 +221,7 @@ g_optimizer = optim.Adam(g_params, lr, [beta1, beta2])
 d_x_optimizer = optim.Adam(D_X.parameters(), lr, [beta1, beta2])
 d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
-device = 'cuda' if torch.cuda.is_available() else 'cpu'
+
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
                 device=device, n_epochs=1000, checkpoint_every=3)
