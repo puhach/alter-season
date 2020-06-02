@@ -13,7 +13,7 @@ import argparse
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
         device, n_epochs, 
-        print_every=10, checkpoint_every=10):
+        print_every=10, checkpoint_every=10, sample_every=20):
     
     
     # keep track of losses over time
@@ -150,8 +150,6 @@ def train(train_dataloader_X, train_dataloader_Y,
                     epoch, n_epochs, d_x_loss.item(), d_y_loss.item(), g_total_loss.item()))
 
             
-        # TODO: add a sample_every parameter
-        sample_every=2
         # Save the generated samples
         if epoch % sample_every == 0:
             G_YtoX.eval() # set generators to eval mode for sample generation
@@ -176,7 +174,7 @@ parser = argparse.ArgumentParser(description='Alter season CycleGAN training scr
 parser.add_argument('--device', type=str, default='cpu',
                     help='The device to use for training. Defaults to CPU.')
 parser.add_argument('--epochs', type=int, required=True, 
-                    help='The number of epochs to train for.')                    
+                    help='The number of epochs to train for.')  
 # TODO: add other params
 
 args = parser.parse_args()
@@ -224,7 +222,7 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=epochs, checkpoint_every=3)
+                device=device, n_epochs=epochs, checkpoint_every=3, sample_every=2)
 
 
 # Load the checkpoint
