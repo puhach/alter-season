@@ -133,6 +133,8 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='sample
     Saves samples from both generators X->Y and Y->X.
     """
 
+    os.makedirs(sample_dir, exist_ok=True)
+
     ## TODO: don't move here, pass the moved tensor instead
     ## move input data to the correct device
     #fake_X = G_YtoX(fixed_Y.to(device))
