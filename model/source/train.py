@@ -175,19 +175,19 @@ parser.add_argument('--device', type=str, default='cpu',
                     help='The device to use for training. Defaults to CPU.')
 parser.add_argument('--epochs', type=int, required=True, 
                     help='The number of epochs to train for.')  
+parser.add_argument('--batch', type=int, default=16, help='The batch size.')
 # TODO: add other params
 
 args = parser.parse_args()
 
 device = args.device
 epochs = args.epochs
+batch_size = args.batch
+image_size = 128
 
 print(f'Using {device} for training')
 
 # Create train and test dataloaders for images from the two domains X and Y
-
-image_size = 128
-batch_size = 16
 
 trainloader_X = get_data_loader(image_type='summer', image_dir='../data/train', shuffle=True, image_size=image_size, batch_size=batch_size)
 trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', shuffle=True, image_size=image_size, batch_size=batch_size)
