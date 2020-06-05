@@ -181,6 +181,7 @@ parser.add_argument('--cpt', type=int, default=10,
                     help='The checkpointing frequency. By default a checkpoint is saved every 10 epochs.')
 parser.add_argument('--sample', type=int, default=20, 
                     help='The sampling frequency. By default sample images are generated every 20 epochs.')
+parser.add_argument('--lr', type=float, default=0.0002, help='The learning rate. Default is 0.0002.')                    
 # TODO: add other params
 
 
@@ -196,7 +197,7 @@ checkpoint_every = args.cpt
 sample_every = args.sample
 
 # hyperparameters for Adam optimizers
-lr=0.0002
+lr = args.lr
 beta1=0.5
 beta2=0.999 
 
