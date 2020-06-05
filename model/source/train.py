@@ -175,7 +175,8 @@ parser.add_argument('--device', type=str, default='cpu',
                     help='The device to use for training. Defaults to CPU.')
 parser.add_argument('--epochs', type=int, required=True, 
                     help='The number of epochs to train for.')  
-parser.add_argument('--batch', type=int, default=16, help='The batch size.')
+parser.add_argument('--batch', type=int, default=16, help='The batch size. Default is 16.')
+parser.add_argument('--imsize', type=int, default=128, help='The size of input images. Defaults to 128.')
 # TODO: add other params
 
 args = parser.parse_args()
@@ -183,7 +184,7 @@ args = parser.parse_args()
 device = args.device
 epochs = args.epochs
 batch_size = args.batch
-image_size = 128
+image_size = args.imsize
 
 print(f'Using {device} for training')
 
