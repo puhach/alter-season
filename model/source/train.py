@@ -177,7 +177,11 @@ parser.add_argument('--epochs', type=int, required=True,
                     help='The number of epochs to train for.')  
 parser.add_argument('--batch', type=int, default=16, help='The batch size. Default is 16.')
 parser.add_argument('--imsize', type=int, default=128, help='The size of input images. Defaults to 128.')
+parser.add_argument('--cpt', type=int, default=10, help='The checkpointing frequency. By default a checkpoint is saved every 10 epochs.')
 # TODO: add other params
+
+
+# Read command line arguments
 
 args = parser.parse_args()
 
@@ -185,6 +189,12 @@ device = args.device
 epochs = args.epochs
 batch_size = args.batch
 image_size = args.imsize
+checkpoint_every = args.cpt
+
+# hyperparameters for Adam optimizers
+lr=0.0002
+beta1=0.5
+beta2=0.999 
 
 print(f'Using {device} for training')
 
@@ -208,11 +218,6 @@ G_XtoY, G_YtoX, D_X, D_Y = create_model(g_conv_dim=64, d_conv_dim=64, n_res_bloc
 
 
 
-# hyperparams for Adam optimizers
-lr=0.0002
-beta1=0.5
-beta2=0.999 
-
 g_params = list(G_XtoY.parameters()) + list(G_YtoX.parameters())  # Get generator parameters
 
 # Create optimizers for the generators and discriminators
@@ -223,7 +228,7 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=epochs, checkpoint_every=3, sample_every=2)
+                device=device, n_epochs=epochs, checkpoint_every=checkpoint_every, sample_every=2)
 
 
 # Load the checkpoint
