@@ -218,7 +218,7 @@ testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', sh
 #device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 # instantiate the complete model
-G_XtoY, G_YtoX, D_X, D_Y = create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device=device)
+G_XtoY, G_YtoX, D_X, D_Y = create_model(image_size=image_size, g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device=device)
 
 ## print the model architecture
 #print_models(G_XtoY, G_YtoX, D_X, D_Y)

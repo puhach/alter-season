@@ -3,17 +3,19 @@ import torch.nn.functional as F
 from helpers import conv, deconv
 
 class ResidualBlock(nn.Module):
-    """Defines a residual block.
-       This adds an input x to a convolutional layer (applied to x) with the same size input and output.
-       These blocks allow a model to learn an effective transformation from one domain to another.
+    """
+    Defines a residual block.
+    It adds an input x to a convolutional layer (applied to x) with the same size input and output.
+    Residual blocks allow a model to learn an effective transformation from one domain to another.
     """
     def __init__(self, conv_dim):
         super(ResidualBlock, self).__init__()
+
         # conv_dim = number of inputs  
         self.conv_dim = conv_dim
         
-        # define two convolutional layers + batch normalization that will act as our residual function, F(x)
-        # layers should have the same shape input as output; I suggest a kernel_size of 3
+        # Define two convolutional layers + batch normalization that will act as our residual function F(x).
+        # Layers should have the same shape input as output. The kernel_size of 3 is suggested.
         self.conv1 = conv(conv_dim, conv_dim, 3, 1, 1, batch_norm=True)
         self.conv2 = conv(conv_dim, conv_dim, 3, 1, 1, batch_norm=True)
                 
@@ -27,8 +29,16 @@ class ResidualBlock(nn.Module):
 
 class CycleGenerator(nn.Module):
     
-    def __init__(self, conv_dim=64, n_res_blocks=6):
+    def __init__(self, image_size, conv_dim=64, n_res_blocks=6):
+        """
+        Instantiates the CycleGAN generator for images of size image_size,
+        the conv_dim outputs produced by the first convolutional layer, and
+        the number of residual blocks specified in n_res_blocks.
+        """
         super(CycleGenerator, self).__init__()
+
+        # save the expected image size (may come in handy for inference)
+        self.image_size = image_size
 
         # Save the initialization parameters
         self.conv_dim = conv_dim
@@ -41,7 +51,7 @@ class CycleGenerator(nn.Module):
 
         # Define the resnet part of the generator
         resnet_layers = []
-        for i in range(n_res_blocks):
+        for _ in range(n_res_blocks):
             resnet_layers.append(ResidualBlock(conv_dim*4))
             
         self.resnet = nn.Sequential(*resnet_layers)
@@ -66,4 +76,4 @@ class CycleGenerator(nn.Module):
         return x
 
     def get_init_params(self):
-        return (self.conv_dim, self.n_res_blocks)
+        return (self.image_size, self.conv_dim, self.n_res_blocks)

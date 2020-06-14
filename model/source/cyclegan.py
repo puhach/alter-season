@@ -3,13 +3,12 @@ from generator import CycleGenerator
 import torch
 
 
-# TODO: remove default values
-def create_model(g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device='cpu'):
+def create_model(image_size, g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device='cpu'):
     """Builds the generators and discriminators."""
     
     # Instantiate generators
-    G_XtoY = CycleGenerator(g_conv_dim, n_res_blocks)
-    G_YtoX = CycleGenerator(g_conv_dim, n_res_blocks)
+    G_XtoY = CycleGenerator(image_size, g_conv_dim, n_res_blocks)
+    G_YtoX = CycleGenerator(image_size, g_conv_dim, n_res_blocks)
     
     # Instantiate discriminators
     D_X = Discriminator(d_conv_dim)
