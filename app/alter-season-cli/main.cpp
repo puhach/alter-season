@@ -24,8 +24,9 @@ int main(int argc, const char* argv[])
 		return -1;
 	}
 
-	for (int i = 0; i < argc; ++i)
-		std::cout << argv[i] << std::endl;
+	//for (int i = 0; i < argc; ++i)
+	//	std::cout << argv[i] << std::endl;
+	const char* modulePath = argv[1];
 
 
 	// Our application accepts the file path to a serialized PyTorch ScriptModule 
@@ -39,19 +40,26 @@ int main(int argc, const char* argv[])
 	{
 		// Deserialize the ScriptModule from a file using torch::jit::load().
 		//module = torch::jit::load(R"(D:\dox\projects\AI\alter-season-cyclegan\model\artifact\summer_to_winter.sm)");
-		module = torch::jit::load(argv[1]);
+		module = torch::jit::load(modulePath);
 		//module = torch::jit::load("../../model/artifact/summer_to_winter.sm");
+
+		std::cout << "The module " << modulePath << " has been successfully loaded" << std::endl;
+
+		// Having successfully loaded our serialized model in C++, we are now just a couple 
+		// lines of code away from executing it
+		int conv_dim = module.attr("image_size").toInt();
+		std::cout << conv_dim << std::endl;
 	}
 	catch (const c10::Error& e)
 	{
-		std::cerr << "error loading the model: " << e.what();
+		// https://pytorch.org/cppdocs/api/classc10_1_1_error.html#exhale-class-classc10-1-1-error
+		std::cerr << "LibTorch error: " << e.what() << std::endl;
 		return -1;
 	}
-
+	catch (const std::exception& e)
+	{
+		std::cerr << e.what() << std::endl;
+		return -2;
+	}
 	
-	std::cout << "ok\n";
-
-	// Having successfully loaded our serialized model in C++, we are now just a couple 
-	// lines of code away from executing it!
-
 }
