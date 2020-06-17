@@ -1,14 +1,10 @@
 ﻿// Tutorial: Loading a TorchScript Model in C++
 // https://pytorch.org/tutorials/advanced/cpp_export.html
 
-// To load your serialized PyTorch model in C++, your application must depend 
-// on the PyTorch C++ API – also known as LibTorch.The LibTorch distribution 
-// encompasses a collection of shared libraries, header filesand CMake build 
-// configuration files.While CMake is not a requirement for depending on LibTorch, 
-// it is the recommended approachand will be well supported into the future. 
-// For this tutorial, we will be building a minimal C++ application using CMakeand 
-// LibTorch that simply loadsand executes a serialized PyTorch model.
-
+#include <opencv2/core.hpp>
+#include <opencv2/imgcodecs.hpp>	// imread
+#include <opencv2/imgproc.hpp>	// cvtColor
+#include <opencv2/highgui.hpp>	// imshow
 
 // encompasses all relevant includes from the LibTorch library necessary to run the example
 #include <torch/script.h> // One-stop header.
@@ -18,15 +14,15 @@
 
 int main(int argc, const char* argv[])
 {
-	if (argc != 2)
+	if (argc != 3)
 	{
-		std::cerr << "usage: alter-season-cli.exe <path-to-exported-script-module>\n";
+		std::cerr << "Usage: alter-season-cli.exe <path-to-exported-script-module> <path-to-the-input-image>\n";
 		return -1;
 	}
 
 	//for (int i = 0; i < argc; ++i)
 	//	std::cout << argv[i] << std::endl;
-	const char* modulePath = argv[1];
+	const char* modulePath = argv[1], *imagePath = argv[2];
 
 
 	// Our application accepts the file path to a serialized PyTorch ScriptModule 
@@ -47,8 +43,20 @@ int main(int argc, const char* argv[])
 
 		// Having successfully loaded our serialized model in C++, we are now just a couple 
 		// lines of code away from executing it
-		int conv_dim = module.attr("image_size").toInt();
-		std::cout << conv_dim << std::endl;
+		int inputImageSize = module.attr("image_size").toInt();
+		std::cout << inputImageSize << std::endl;
+		assert(inputImageSize > 0);
+
+		// Read the input image
+		cv::Mat inputImg = cv::imread(imagePath, cv::IMREAD_COLOR);
+		if (inputImg.empty())
+			throw std::exception("Failed to read the input image.");
+
+		//cv::cvtColor(inputImg, inputImg, cv::COLOR_BGR2RGB);
+		//cv::resize(inputImg, inputImg, cv::Size(inputImageSize, inputImageSize));
+
+		cv::imshow("output", inputImg);
+		cv::waitKey();
 	}
 	catch (const c10::Error& e)
 	{
