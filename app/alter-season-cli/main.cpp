@@ -52,8 +52,8 @@ int main(int argc, const char* argv[])
 		if (inputImg.empty())
 			throw std::exception("Failed to read the input image.");
 
-		//cv::cvtColor(inputImg, inputImg, cv::COLOR_BGR2RGB);
-		//cv::resize(inputImg, inputImg, cv::Size(inputImageSize, inputImageSize));
+		cv::cvtColor(inputImg, inputImg, cv::COLOR_BGR2RGB);
+		cv::resize(inputImg, inputImg, cv::Size(inputImageSize, inputImageSize));
 
 		cv::imshow("output", inputImg);
 		cv::waitKey();
