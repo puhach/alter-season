@@ -62,6 +62,9 @@ int main(int argc, const char* argv[])
 		std::vector<int64_t> inputShape = { 1, inputImg.rows, inputImg.cols, inputImg.channels() };
 		at::Tensor inputTensor = torch::from_blob(inputImg.data, at::IntList(inputShape), torch::TensorOptions(at::kFloat));
 
+		// Convert the channel order BHWC -> BCHW
+		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
+
 		cv::imshow("input", inputImg);
 		cv::waitKey();
 	}
