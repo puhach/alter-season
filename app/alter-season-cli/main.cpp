@@ -52,10 +52,17 @@ int main(int argc, const char* argv[])
 		if (inputImg.empty())
 			throw std::exception("Failed to read the input image.");
 
+		// Convert BGR -> RGB
 		cv::cvtColor(inputImg, inputImg, cv::COLOR_BGR2RGB);
+
+		// Resize the image to match the size expected by the generator
 		cv::resize(inputImg, inputImg, cv::Size(inputImageSize, inputImageSize));
 
-		cv::imshow("output", inputImg);
+		// Convert the input image (cv::Mat) to a Torch tensor
+		std::vector<int64_t> inputShape = { 1, inputImg.rows, inputImg.cols, inputImg.channels() };
+		at::Tensor inputTensor = torch::from_blob(inputImg.data, at::IntList(inputShape), torch::TensorOptions(at::kFloat));
+
+		cv::imshow("input", inputImg);
 		cv::waitKey();
 	}
 	catch (const c10::Error& e)
