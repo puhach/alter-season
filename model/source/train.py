@@ -244,10 +244,12 @@ G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device=device)
 
 # Export the generators
 print('Creating script modules...')
+artifact_dir = '../artifact'
+os.makedirs(artifact_dir, exist_ok=True)
 sm_g_x_to_y = torch.jit.script(G_XtoY)
-sm_g_x_to_y.save(os.path.join('../artifact', 'summer_to_winter.sm'))
+sm_g_x_to_y.save(os.path.join(artifact_dir, 'summer_to_winter.sm'))
 sm_g_y_to_x = torch.jit.script(G_YtoX)
-sm_g_y_to_x.save(os.path.join('../artifact', 'winter_to_summer.sm'))
+sm_g_y_to_x.save(os.path.join(artifact_dir, 'winter_to_summer.sm'))
 
 
 # Test the script modules
