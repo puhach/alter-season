@@ -5,8 +5,6 @@ from generator import CycleGenerator
 
 
 
-# TODO: move save/load functions to checkpoint.py
-
 def save_instance(instance, file_path):
     """
     Saves the initialization parameters and the state dictionary of the discriminator or the generator.
@@ -78,6 +76,7 @@ def load_instance(instance_class, file_path, device):
     model_info = torch.load(file_path, map_location=device)
     init_params = model_info['init_params']
     instance = instance_class(*init_params)
+    instance.load_state_dict(model_info)
     instance = instance.to(device)
     return instance
 
