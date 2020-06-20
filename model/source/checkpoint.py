@@ -76,7 +76,7 @@ def load_instance(instance_class, file_path, device):
     model_info = torch.load(file_path, map_location=device)
     init_params = model_info['init_params']
     instance = instance_class(*init_params)
-    instance.load_state_dict(model_info)
+    instance.load_state_dict(model_info['state_dict'])
     instance.eval()
     instance = instance.to(device)
     return instance
