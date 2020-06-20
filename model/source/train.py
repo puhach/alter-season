@@ -240,7 +240,7 @@ losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y,
 
 
 # Load the checkpoint
-G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device=device)
+G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device='cpu')
 
 # Export the generators
 print('Creating script modules...')
