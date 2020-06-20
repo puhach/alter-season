@@ -65,6 +65,11 @@ int main(int argc, const char* argv[])
 		// Convert the channel order BHWC -> BCHW
 		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
 
+		// Scale pixel values to the [-1; +1] range
+		double minPixel = -1, maxPixel = +1;
+		inputTensor = inputTensor.mul(maxPixel - minPixel).add_(minPixel);
+
+		
 		cv::imshow("input", inputImg);
 		cv::waitKey();
 	}
