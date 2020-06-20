@@ -77,6 +77,7 @@ def load_instance(instance_class, file_path, device):
     init_params = model_info['init_params']
     instance = instance_class(*init_params)
     instance.load_state_dict(model_info)
+    instance.eval()
     instance = instance.to(device)
     return instance
 
