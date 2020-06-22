@@ -69,7 +69,10 @@ int main(int argc, const char* argv[])
 		double minPixel = -1, maxPixel = +1;
 		inputTensor = inputTensor.mul(maxPixel - minPixel).add_(minPixel);
 
-		
+		// Create the input vector from the scaled image tensor
+		std::vector<torch::jit::IValue> inputs({ inputTensor });
+
+
 		cv::imshow("input", inputImg);
 		cv::waitKey();
 	}
