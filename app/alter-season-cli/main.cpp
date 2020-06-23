@@ -54,27 +54,32 @@ int main(int argc, const char* argv[])
 
 		// Convert BGR -> RGB
 		cv::cvtColor(inputImg, inputImg, cv::COLOR_BGR2RGB);
-
+				
 		// Resize the image to match the size expected by the generator
 		cv::resize(inputImg, inputImg, cv::Size(inputImageSize, inputImageSize));
+
+		// Scale pixel values to [0; 1.0]
+		inputImg.convertTo(inputImg, CV_32FC3, 1 / 255.0);
+
 
 		// Convert the input image (cv::Mat) to a Torch tensor
 		std::vector<int64_t> inputShape = { 1, inputImg.rows, inputImg.cols, inputImg.channels() };
 		at::Tensor inputTensor = torch::from_blob(inputImg.data, at::IntList(inputShape), torch::TensorOptions(at::kFloat));
+		//at::Tensor inputTensor = torch::from_blob(inputImg.data, at::IntList(inputShape), torch::TensorOptions(at::kByte)).toType(torch::kFloat);
 
 		// Convert the channel order BHWC -> BCHW
 		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
+
+		//at::print(std::cout, inputTensor, 100);
 
 		// Scale pixel values to the [-1; +1] range
 		double minPixel = -1, maxPixel = +1;
 		inputTensor = inputTensor.mul(maxPixel - minPixel).add_(minPixel);
 
+		//at::print(std::cout, inputTensor, 100);	 
+
 		// Create the input vector from the scaled image tensor
 		std::vector<torch::jit::IValue> inputs({ inputTensor });
-
-
-		cv::imshow("input", inputImg);
-		cv::waitKey();
 	}
 	catch (const c10::Error& e)
 	{
