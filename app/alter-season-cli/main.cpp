@@ -61,6 +61,8 @@ int main(int argc, const char* argv[])
 		// Scale pixel values to [0; 1.0]
 		inputImg.convertTo(inputImg, CV_32FC3, 1 / 255.0);
 
+		// A RAII, thread-local guard that disables gradient calculation
+		torch::NoGradGuard noGrad;
 
 		// Convert the input image (cv::Mat) to a Torch tensor
 		std::vector<int64_t> inputShape = { 1, inputImg.rows, inputImg.cols, inputImg.channels() };
@@ -80,6 +82,7 @@ int main(int argc, const char* argv[])
 
 		// Create the input vector from the scaled image tensor
 		std::vector<torch::jit::IValue> inputs({ inputTensor });
+
 	}
 	catch (const c10::Error& e)
 	{
