@@ -98,10 +98,8 @@ def merge_images(sources, targets):
     #merged = np.zeros([3, row*h, row*w*2])
     grid = np.zeros([channels, rows*h, cols*w*2], dtype=np.uint8)
     for idx, (s, t) in enumerate(zip(sources, targets)):
-        #i = idx // row
-        #j = idx % row
-        i = idx // rows
-        j = idx % rows
+        i = idx // cols
+        j = idx % cols
         grid[:, i*h:(i+1)*h, (j*2)*h:(j*2+1)*h] = s
         grid[:, i*h:(i+1)*h, (j*2+1)*h:(j*2+2)*h] = t
     grid = grid.transpose(1, 2, 0)
