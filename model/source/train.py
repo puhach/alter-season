@@ -95,7 +95,8 @@ def train(train_dataloader_X, train_dataloader_Y,
         
         d_y_loss = d_y_real_loss + d_y_fake_loss
         
-        
+
+        d_total_loss = d_x_loss + d_y_loss
 
 
         # =========================================
@@ -128,14 +129,15 @@ def train(train_dataloader_X, train_dataloader_Y,
         
         rec_x_loss = cycle_consistency_loss(images_X, x_hat, lambda_weight=10)
 
-        # 5. Add up all generator and reconstructed losses and perform backprop
+        # 5. Add up all generator and reconstructed losses 
         g_total_loss = g_x_loss + rec_y_loss + g_y_loss + rec_x_loss
         
 
 
         # Perform backprop
+
         
-        if (d_x_loss + d_y_loss > g_total_loss):
+        if d_total_loss > 0.01*g_total_loss:
             d_x_optimizer.zero_grad()
             d_x_loss.backward()
             d_x_optimizer.step()
@@ -143,7 +145,8 @@ def train(train_dataloader_X, train_dataloader_Y,
             d_y_optimizer.zero_grad()
             d_y_loss.backward()
             d_y_optimizer.step()
-        else:
+        
+        if g_total_loss > 0.01*d_total_loss:
             g_optimizer.zero_grad()
             g_total_loss.backward()
             g_optimizer.step()
