@@ -12,7 +12,7 @@ import argparse
 
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
-        device, n_epochs, 
+        device, n_epochs, reconstruction_weight,
         print_every=10, checkpoint_every=10, sample_every=20):
     
     
@@ -72,16 +72,16 @@ def train(train_dataloader_X, train_dataloader_Y,
 
         # 1. Compute the discriminator losses on real images
         d_x_out = D_X(images_X)
-        #d_x_loss_real = real_mse_loss(d_x_out)
-        d_x_loss_real = bce_loss_crit(d_x_out, torch.ones_like(d_x_out))
+        d_x_loss_real = real_mse_loss(d_x_out)
+        #d_x_loss_real = bce_loss_crit(d_x_out, torch.ones_like(d_x_out))
         
         # 2. Generate fake images that look like domain X based on real images in domain Y
         fake_x = G_YtoX(images_Y)
 
         # 3. Compute the fake loss for D_X
         d_x_out = D_X(fake_x)
-        #d_x_loss_fake = fake_mse_loss(d_x_out)
-        d_x_loss_fake = bce_loss_crit(d_x_out, torch.zeros_like(d_x_out))
+        d_x_loss_fake = fake_mse_loss(d_x_out)
+        #d_x_loss_fake = bce_loss_crit(d_x_out, torch.zeros_like(d_x_out))
         
         # 4. Compute the total loss
         d_x_loss = d_x_loss_real + d_x_loss_fake
@@ -91,13 +91,13 @@ def train(train_dataloader_X, train_dataloader_Y,
         ##   Second: D_Y, real and fake loss components   ##
         
         d_y_out = D_Y(images_Y) 
-        #d_y_real_loss = real_mse_loss(d_y_out)  # D_y disciminator loss on a real Y image
-        d_y_real_loss = bce_loss_crit(d_y_out, torch.ones_like(d_y_out))
+        d_y_real_loss = real_mse_loss(d_y_out)  # D_y disciminator loss on a real Y image
+        #d_y_real_loss = bce_loss_crit(d_y_out, torch.ones_like(d_y_out))
         
         fake_y = G_XtoY(images_X) # generate fake Y image from the real X image
         d_y_out = D_Y(fake_y)
-        #d_y_fake_loss = fake_mse_loss(d_y_out) # compute D_y loss on a fake Y image
-        d_y_fake_loss = bce_loss_crit(d_y_out, torch.zeros_like(d_y_out))
+        d_y_fake_loss = fake_mse_loss(d_y_out) # compute D_y loss on a fake Y image
+        #d_y_fake_loss = bce_loss_crit(d_y_out, torch.zeros_like(d_y_out))
         
         d_y_loss = d_y_real_loss + d_y_fake_loss
         
@@ -123,7 +123,7 @@ def train(train_dataloader_X, train_dataloader_Y,
         y_hat = G_XtoY(fake_x)
                 
         # 4. Compute the cycle consistency loss (the reconstruction loss)
-        rec_y_loss = cycle_consistency_loss(images_Y, y_hat, lambda_weight=10)
+        rec_y_loss = cycle_consistency_loss(images_Y, y_hat, lambda_weight=reconstruction_weight)
 
 
         ##    Second: generate fake Y images and reconstructed X images    ##
@@ -134,17 +134,17 @@ def train(train_dataloader_X, train_dataloader_Y,
         
         x_hat = G_YtoX(fake_y)
         
-        rec_x_loss = cycle_consistency_loss(images_X, x_hat, lambda_weight=10)
+        rec_x_loss = cycle_consistency_loss(images_X, x_hat, lambda_weight=reconstruction_weight)
 
         # 5. Add up all generator and reconstructed losses 
-        g_total_loss = g_x_loss + rec_y_loss + g_y_loss + rec_x_loss
+        g_total_loss = g_x_loss + g_y_loss + rec_x_loss + rec_y_loss
         
 
 
         # Perform backprop
 
         
-        if d_total_loss > 0.01*g_total_loss:
+        if d_total_loss >= 0.01*g_total_loss:
             d_x_optimizer.zero_grad()
             d_x_loss.backward()
             d_x_optimizer.step()
@@ -153,7 +153,7 @@ def train(train_dataloader_X, train_dataloader_Y,
             d_y_loss.backward()
             d_y_optimizer.step()
         
-        if g_total_loss > 0.01*d_total_loss:
+        if g_total_loss >= 0.01*d_total_loss:
             g_optimizer.zero_grad()
             g_total_loss.backward()
             g_optimizer.step()
@@ -198,9 +198,10 @@ parser.add_argument('--cpt', type=int, default=10,
                     help='The checkpointing frequency. By default a checkpoint is saved every 10 epochs.')
 parser.add_argument('--sample', type=int, default=20, 
                     help='The sampling frequency. By default sample images are generated every 20 epochs.')
-parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate. Default is 0.0002.')  
+parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate. Default is 0.0001.')  
 parser.add_argument('--beta1', type=float, default=0.5, help='Beta1 parameter for the Adam optimizer.')  
 parser.add_argument('--beta2', type=float, default=0.999, help='Beta2 parameter for the Adam optimizer.')                
+parser.add_argument('--rw', type=float, default=10, help='Reconstruction loss weight. Default is 10.')
 # TODO: add other params
 
 
@@ -219,6 +220,7 @@ sample_every = args.sample
 lr = args.lr
 beta1=args.beta1
 beta2=args.beta2
+reconstruction_weight = args.rw
 
 print(f'Using {device} for training')
 
@@ -252,7 +254,9 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=epochs, checkpoint_every=checkpoint_every, 
+                device=device, n_epochs=epochs, 
+                reconstruction_weight=reconstruction_weight,
+                checkpoint_every=checkpoint_every, 
                 sample_every=sample_every)
 
 
