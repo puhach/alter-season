@@ -38,6 +38,8 @@ def train(train_dataloader_X, train_dataloader_Y,
     batches_per_epoch = min(len(iter_X), len(iter_Y))
     #tmp = min(len(train_dataloader_X), len(train_dataloader_Y))
 
+    bce_loss_crit = torch.nn.BCEWithLogitsLoss(reduction='mean')
+
     for epoch in range(1, n_epochs+1):
 
         # Reset iterators for each epoch
@@ -65,19 +67,21 @@ def train(train_dataloader_X, train_dataloader_Y,
         # ============================================
         #            TRAIN THE DISCRIMINATORS
         # ============================================
-
+        
         ##   First: D_X, real and fake loss components   ##
 
         # 1. Compute the discriminator losses on real images
         d_x_out = D_X(images_X)
-        d_x_loss_real = real_mse_loss(d_x_out)
+        #d_x_loss_real = real_mse_loss(d_x_out)
+        d_x_loss_real = bce_loss_crit(d_x_out, torch.ones_like(d_x_out))
         
         # 2. Generate fake images that look like domain X based on real images in domain Y
         fake_x = G_YtoX(images_Y)
 
         # 3. Compute the fake loss for D_X
         d_x_out = D_X(fake_x)
-        d_x_loss_fake = fake_mse_loss(d_x_out)
+        #d_x_loss_fake = fake_mse_loss(d_x_out)
+        d_x_loss_fake = bce_loss_crit(d_x_out, torch.zeros_like(d_x_out))
         
         # 4. Compute the total loss
         d_x_loss = d_x_loss_real + d_x_loss_fake
@@ -87,11 +91,13 @@ def train(train_dataloader_X, train_dataloader_Y,
         ##   Second: D_Y, real and fake loss components   ##
         
         d_y_out = D_Y(images_Y) 
-        d_y_real_loss = real_mse_loss(d_y_out)  # D_y disciminator loss on a real Y image
+        #d_y_real_loss = real_mse_loss(d_y_out)  # D_y disciminator loss on a real Y image
+        d_y_real_loss = bce_loss_crit(d_y_out, torch.ones_like(d_y_out))
         
         fake_y = G_XtoY(images_X) # generate fake Y image from the real X image
         d_y_out = D_Y(fake_y)
-        d_y_fake_loss = fake_mse_loss(d_y_out) # compute D_y loss on a fake Y image
+        #d_y_fake_loss = fake_mse_loss(d_y_out) # compute D_y loss on a fake Y image
+        d_y_fake_loss = bce_loss_crit(d_y_out, torch.zeros_like(d_y_out))
         
         d_y_loss = d_y_real_loss + d_y_fake_loss
         
@@ -111,6 +117,7 @@ def train(train_dataloader_X, train_dataloader_Y,
         # 2. Compute the generator loss based on domain X
         d_out = D_X(fake_x)
         g_x_loss = real_mse_loss(d_out) # fake X should trick the D_x
+        # TODO: consider using MSELoss or SmoothL1Loss (Huber loss)
 
         # 3. Create a reconstructed y
         y_hat = G_XtoY(fake_x)

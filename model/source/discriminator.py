@@ -29,8 +29,12 @@ class Discriminator(nn.Module):
         x = F.relu(self.conv2(x)) # (64, 64, 64) -> (128, 32, 32)
         x = F.relu(self.conv3(x)) # (128, 32, 32) -> (256, 16, 16)
         x = F.relu(self.conv4(x)) # (256, 16, 16) -> (512, 8, 8)
-        #x = self.conv5(x) # (512,8,8) -> (1, 1, 1)
-        x = F.sigmoid(self.conv5(x))
+
+        # No need to apply sigmoid in case we use BCEWithLogitsLoss:
+        # https://pytorch.org/docs/stable/nn.html
+        x = self.conv5(x) # (512,8,8) -> (1, 1, 1)
+        #x = F.sigmoid(self.conv5(x))
+        
         return x
 
     def get_init_params(self):
