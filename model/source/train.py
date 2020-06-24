@@ -79,12 +79,9 @@ def train(train_dataloader_X, train_dataloader_Y,
         d_x_out = D_X(fake_x)
         d_x_loss_fake = fake_mse_loss(d_x_out)
         
-        # 4. Compute the total loss and perform backprop
+        # 4. Compute the total loss
         d_x_loss = d_x_loss_real + d_x_loss_fake
         
-        d_x_optimizer.zero_grad()
-        d_x_loss.backward()
-        d_x_optimizer.step()
 
         
         ##   Second: D_Y, real and fake loss components   ##
@@ -98,9 +95,6 @@ def train(train_dataloader_X, train_dataloader_Y,
         
         d_y_loss = d_y_real_loss + d_y_fake_loss
         
-        d_y_optimizer.zero_grad()
-        d_y_loss.backward()
-        d_y_optimizer.step()
         
 
 
@@ -137,9 +131,22 @@ def train(train_dataloader_X, train_dataloader_Y,
         # 5. Add up all generator and reconstructed losses and perform backprop
         g_total_loss = g_x_loss + rec_y_loss + g_y_loss + rec_x_loss
         
-        g_optimizer.zero_grad()
-        g_total_loss.backward()
-        g_optimizer.step()
+
+
+        # Perform backprop
+        
+        if (d_x_loss + d_y_loss > g_total_loss):
+            d_x_optimizer.zero_grad()
+            d_x_loss.backward()
+            d_x_optimizer.step()
+
+            d_y_optimizer.zero_grad()
+            d_y_loss.backward()
+            d_y_optimizer.step()
+        else:
+            g_optimizer.zero_grad()
+            g_total_loss.backward()
+            g_optimizer.step()
 
         
         # Print the log info
