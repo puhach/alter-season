@@ -14,7 +14,7 @@ def train(train_dataloader_X, train_dataloader_Y,
         test_dataloader_X, test_dataloader_Y, 
         device, n_epochs, 
         reconstruction_weight, identity_weight,
-        print_every=10, checkpoint_every=10, sample_every=20):
+        print_every=1, checkpoint_every=10, sample_every=10):
     
     
     # keep track of losses over time
@@ -227,8 +227,8 @@ parser.add_argument('--batch', type=int, default=16, help='The batch size. Defau
 parser.add_argument('--imsize', type=int, default=128, help='The size of input images. Defaults to 128.')
 parser.add_argument('--cpt', type=int, default=10, 
                     help='The checkpointing frequency. By default a checkpoint is saved every 10 epochs.')
-parser.add_argument('--sample', type=int, default=20, 
-                    help='The sampling frequency. By default sample images are generated every 20 epochs.')
+parser.add_argument('--sample', type=int, default=10, 
+                    help='The sampling frequency. By default sample images are generated every 10 epochs.')
 parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate. Default is 0.0001.')  
 parser.add_argument('--beta1', type=float, default=0.5, help='Beta1 parameter for the Adam optimizer.')  
 parser.add_argument('--beta2', type=float, default=0.999, help='Beta2 parameter for the Adam optimizer.')                
