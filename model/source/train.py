@@ -12,7 +12,7 @@ import argparse
 
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
-        device, n_epochs, 
+        device, n_epochs, balance,
         reconstruction_weight, identity_weight,
         print_every=1, checkpoint_every=10, sample_every=10):
     
@@ -164,7 +164,7 @@ def train(train_dataloader_X, train_dataloader_Y,
 
             # Perform backprop
             
-            if d_total_loss >= 0.01*g_total_loss:
+            if d_total_loss >= balance*g_total_loss:
                 d_x_optimizer.zero_grad()
                 d_x_loss.backward()
                 d_x_optimizer.step()
@@ -173,7 +173,7 @@ def train(train_dataloader_X, train_dataloader_Y,
                 d_y_loss.backward()
                 d_y_optimizer.step()
             
-            if g_total_loss >= 0.01*d_total_loss:
+            if g_total_loss >= balance*d_total_loss:
                 g_optimizer.zero_grad()
                 g_total_loss.backward()
                 g_optimizer.step()
@@ -234,7 +234,10 @@ parser.add_argument('--beta1', type=float, default=0.5, help='Beta1 parameter fo
 parser.add_argument('--beta2', type=float, default=0.999, help='Beta2 parameter for the Adam optimizer.')                
 parser.add_argument('--rw', type=float, default=10, help='Reconstruction loss weight. Default is 10.')
 parser.add_argument('--iw', type=float, default=1, help='Identity mapping loss weight. Default is 1.')
-# TODO: add other params
+parser.add_argument('--balance', type=float, default=0, help='If the ratio of the training loss to '
+                    'the loss of an adversary becomes less than the balance value, training of the '
+                    'superior network will stop. Default is 0, which means discriminators and generators '
+                    'are unconstrained in their training progress.')
 
 
 # Read command line arguments
@@ -254,6 +257,8 @@ beta1=args.beta1
 beta2=args.beta2
 reconstruction_weight = args.rw
 identity_weight = args.iw
+
+balance = args.balance
 
 print(f'Using {device} for training')
 
@@ -287,7 +292,7 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 
 
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
-                device=device, n_epochs=epochs, 
+                device=device, n_epochs=epochs, balance=balance,
                 reconstruction_weight=reconstruction_weight,
                 identity_weight=identity_weight,
                 checkpoint_every=checkpoint_every, 
