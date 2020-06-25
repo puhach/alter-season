@@ -1,6 +1,6 @@
 from dataloader import get_data_loader
 from display import imshow
-from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss
+from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss, identity_mapping_loss
 #from preprocess import scale
 from helpers import scale, print_models, save_samples
 from checkpoint import save_checkpoint, load_checkpoint
@@ -12,7 +12,8 @@ import argparse
 
 def train(train_dataloader_X, train_dataloader_Y, 
         test_dataloader_X, test_dataloader_Y, 
-        device, n_epochs, reconstruction_weight,
+        device, n_epochs, 
+        reconstruction_weight, identity_weight,
         print_every=10, checkpoint_every=10, sample_every=20):
     
     
@@ -38,7 +39,7 @@ def train(train_dataloader_X, train_dataloader_Y,
     batches_per_epoch = min(len(iter_X), len(iter_Y))
     #tmp = min(len(train_dataloader_X), len(train_dataloader_Y))
 
-    bce_loss_crit = torch.nn.BCEWithLogitsLoss(reduction='mean')
+    #bce_loss_crit = torch.nn.BCEWithLogitsLoss(reduction='mean')
 
     for epoch in range(1, n_epochs+1):
 
@@ -74,6 +75,7 @@ def train(train_dataloader_X, train_dataloader_Y,
         d_x_out = D_X(images_X)
         d_x_loss_real = real_mse_loss(d_x_out)
         #d_x_loss_real = bce_loss_crit(d_x_out, torch.ones_like(d_x_out))
+        #d_x_loss_real = torch.nn.functional.binary_cross_entropy_with_logits(d_x_out, torch.ones_like(d_x_out))
         
         # 2. Generate fake images that look like domain X based on real images in domain Y
         fake_x = G_YtoX(images_Y)
@@ -82,6 +84,7 @@ def train(train_dataloader_X, train_dataloader_Y,
         d_x_out = D_X(fake_x)
         d_x_loss_fake = fake_mse_loss(d_x_out)
         #d_x_loss_fake = bce_loss_crit(d_x_out, torch.zeros_like(d_x_out))
+        #d_x_loss_fake = torch.nn.functional.binary_cross_entropy_with_logits(d_x_out, torch.zeros_like(d_x_out))
         
         # 4. Compute the total loss
         d_x_loss = d_x_loss_real + d_x_loss_fake
@@ -93,11 +96,13 @@ def train(train_dataloader_X, train_dataloader_Y,
         d_y_out = D_Y(images_Y) 
         d_y_real_loss = real_mse_loss(d_y_out)  # D_y disciminator loss on a real Y image
         #d_y_real_loss = bce_loss_crit(d_y_out, torch.ones_like(d_y_out))
+        #d_y_real_loss = torch.nn.functional.binary_cross_entropy_with_logits(d_y_out, torch.ones_like(d_y_out))
         
         fake_y = G_XtoY(images_X) # generate fake Y image from the real X image
         d_y_out = D_Y(fake_y)
         d_y_fake_loss = fake_mse_loss(d_y_out) # compute D_y loss on a fake Y image
         #d_y_fake_loss = bce_loss_crit(d_y_out, torch.zeros_like(d_y_out))
+        #d_y_fake_loss = torch.nn.functional.binary_cross_entropy_with_logits(d_y_out, torch.zeros_like(d_y_out))
         
         d_y_loss = d_y_real_loss + d_y_fake_loss
         
@@ -111,19 +116,25 @@ def train(train_dataloader_X, train_dataloader_Y,
 
         ##    First: generate fake X images and reconstructed Y images    ##
 
-        # 1. Generate fake images that look like domain X based on real images in domain Y
+        # Generate fake images that look like domain X based on real images in domain Y
         fake_x = G_YtoX(images_Y)
 
-        # 2. Compute the generator loss based on domain X
+        # Compute the generator loss based on domain X
         d_out = D_X(fake_x)
         g_x_loss = real_mse_loss(d_out) # fake X should trick the D_x
         # TODO: consider using MSELoss or SmoothL1Loss (Huber loss)
 
-        # 3. Create a reconstructed y
+        # Create a reconstructed y
         y_hat = G_XtoY(fake_x)
                 
-        # 4. Compute the cycle consistency loss (the reconstruction loss)
+        # Compute the cycle consistency loss (the reconstruction loss)
         rec_y_loss = cycle_consistency_loss(images_Y, y_hat, lambda_weight=reconstruction_weight)
+
+        # Conversion from X to X should be an identity mapping
+        it_x = G_YtoX(images_X)
+
+        # Compute the identity mapping loss
+        it_x_loss = identity_mapping_loss(images_X, it_x, weight=identity_weight)
 
 
         ##    Second: generate fake Y images and reconstructed X images    ##
@@ -136,8 +147,13 @@ def train(train_dataloader_X, train_dataloader_Y,
         
         rec_x_loss = cycle_consistency_loss(images_X, x_hat, lambda_weight=reconstruction_weight)
 
-        # 5. Add up all generator and reconstructed losses 
-        g_total_loss = g_x_loss + g_y_loss + rec_x_loss + rec_y_loss
+        it_y = G_XtoY(images_Y)
+
+        it_y_loss = identity_mapping_loss(images_Y, it_y, weight=identity_weight)
+
+
+        # Add up all generator and reconstructed losses 
+        g_total_loss = g_x_loss + g_y_loss + rec_x_loss + rec_y_loss + it_x_loss + it_y_loss
         
 
 
@@ -202,6 +218,7 @@ parser.add_argument('--lr', type=float, default=0.0001, help='The learning rate.
 parser.add_argument('--beta1', type=float, default=0.5, help='Beta1 parameter for the Adam optimizer.')  
 parser.add_argument('--beta2', type=float, default=0.999, help='Beta2 parameter for the Adam optimizer.')                
 parser.add_argument('--rw', type=float, default=10, help='Reconstruction loss weight. Default is 10.')
+parser.add_argument('--iw', type=float, default=1, help='Identity mapping loss weight. Default is 1.')
 # TODO: add other params
 
 
@@ -221,6 +238,7 @@ lr = args.lr
 beta1=args.beta1
 beta2=args.beta2
 reconstruction_weight = args.rw
+identity_weight = args.iw
 
 print(f'Using {device} for training')
 
@@ -256,6 +274,7 @@ d_y_optimizer = optim.Adam(D_Y.parameters(), lr, [beta1, beta2])
 losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y, 
                 device=device, n_epochs=epochs, 
                 reconstruction_weight=reconstruction_weight,
+                identity_weight=identity_weight,
                 checkpoint_every=checkpoint_every, 
                 sample_every=sample_every)
 

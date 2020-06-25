@@ -47,3 +47,9 @@ def cycle_consistency_loss(real_im, reconstructed_im, lambda_weight):
     loss = torch.mean(torch.abs(real_im - reconstructed_im))
     # return weighted loss
     return lambda_weight*loss
+
+def identity_mapping_loss(real_im, generated_im, weight):
+    # calculate the identity mapping loss
+    loss = torch.nn.functional.l1_loss(real_im, generated_im, reduction='mean')
+    # return weighted loss
+    return weight*loss
