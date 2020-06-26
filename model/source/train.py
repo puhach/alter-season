@@ -183,7 +183,6 @@ def train(train_dataloader_X, train_dataloader_Y,
             epoch_loss_d_y += d_y_loss.item()
             epoch_loss_g += g_total_loss.item()
 
-            
 
         # Reset the iterators when epoch ends
         iter_X = iter(train_dataloader_X)

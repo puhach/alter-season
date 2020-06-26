@@ -99,8 +99,9 @@ def export_script_module(G, export_dir, file_name):
     """
     os.makedirs(export_dir, exist_ok=True)
     
-    G_cpu = G.__class__(G.get_init_params())
-    G_cpu.load_state_dict(G.state_dict())
+    G_cpu = copy.deepcopy(G).cpu()
+    #G_cpu = G.__class__(G.get_init_params())
+    #G_cpu.load_state_dict(G.state_dict())
 
     sm = torch.jit.script(G_cpu)
     sm.save(os.path.join(export_dir, file_name))
