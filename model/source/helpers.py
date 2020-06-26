@@ -145,14 +145,28 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='sample
     
     #grid_xy = merge_images(X, fake_Y, batch_size)
     grid_xy = merge_images(X, fake_Y)
-    path = os.path.join(sample_dir, 'sample-{:06d}-X-Y.png'.format(iteration))
+    path = os.path.join(sample_dir, 'sample-{:05d}-X-Y.png'.format(iteration))
     #scipy.misc.imsave(path, merged)
     imageio.imwrite(path, grid_xy)
     #print('Saved {}'.format(path))
     
     #grid_yx = merge_images(Y, fake_X, batch_size)
     grid_yx = merge_images(Y, fake_X)
-    path = os.path.join(sample_dir, 'sample-{:06d}-Y-X.png'.format(iteration))
+    path = os.path.join(sample_dir, 'sample-{:05d}-Y-X.png'.format(iteration))
     #scipy.misc.imsave(path, merged)
     imageio.imwrite(path, grid_yx)
     #print('Saved {}'.format(path))
+
+
+def export_script_modules(G_XtoY, G_YtoX, epoch, export_dir):
+    """
+    Convert the generators from PyTorch models to TorchScript modules, which can be loaded from a C++ program.
+    """
+
+    os.makedirs(export_dir, exist_ok=True)
+    sm_g_x_to_y = torch.jit.script(G_XtoY.cpu())
+    sm_g_x_to_y.save(os.path.join(export_dir, 'summer_to_winter_e{:05d}.sm'.format(epoch)))
+    sm_g_y_to_x = torch.jit.script(G_YtoX.cpu())
+    sm_g_y_to_x.save(os.path.join(export_dir, 'winter_to_summer_e{:05d}.sm'.format(epoch)))
+
+

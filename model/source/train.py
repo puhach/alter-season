@@ -2,7 +2,7 @@ from dataloader import get_data_loader
 from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss, identity_mapping_loss
 #from preprocess import scale
-from helpers import scale, print_models, save_samples
+from helpers import scale, print_models, save_samples, export_script_modules
 from checkpoint import save_checkpoint, load_checkpoint
 import torch
 import torch.optim as optim
@@ -183,6 +183,7 @@ def train(train_dataloader_X, train_dataloader_Y,
             epoch_loss_d_y += d_y_loss.item()
             epoch_loss_g += g_total_loss.item()
         
+
         # Reset the iterators when epoch ends
         iter_X = iter(train_dataloader_X)
         iter_Y = iter(train_dataloader_Y)
@@ -210,9 +211,8 @@ def train(train_dataloader_X, train_dataloader_Y,
         
         # Save the model parameters
         if epoch % checkpoint_every == 0 or epoch == n_epochs:
-            save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, 
-                '../checkpoints')
-#                os.path.join('checkpoints', f'{epoch: <{4}}'))
+            save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, '../checkpoints')
+            export_script_modules(G_XtoY, G_YtoX, epoch, '../artifacts')
 
     return losses
 
@@ -299,30 +299,30 @@ losses = train(trainloader_X, trainloader_Y, testloader_X, testloader_Y,
                 sample_every=sample_every)
 
 
-# Load the checkpoint
-G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device='cpu')
-
-# Export the generators
-print('Creating script modules...')
-artifact_dir = '../artifact'
-os.makedirs(artifact_dir, exist_ok=True)
-sm_g_x_to_y = torch.jit.script(G_XtoY)
-sm_g_x_to_y.save(os.path.join(artifact_dir, 'summer_to_winter.sm'))
-sm_g_y_to_x = torch.jit.script(G_YtoX)
-sm_g_y_to_x.save(os.path.join(artifact_dir, 'winter_to_summer.sm'))
-
-
-# Test the script modules
-print('Testing the script modules...')
-
-batch = next(iter(testloader_X))
-scaled_img = scale(batch[0][0])
-test_y = sm_g_x_to_y(scaled_img.unsqueeze(0))
-print('x -> y:', test_y.shape)
-
-batch = next(iter(testloader_Y))
-scaled_img = scale(batch[0][0])
-test_x = sm_g_y_to_x(scaled_img.unsqueeze(0))
-print('y -> x:', test_x.shape)
+## Load the checkpoint
+#G_XtoY, G_YtoX, D_X, D_Y = load_checkpoint('../checkpoints', device='cpu')
+#
+## Export the generators
+#print('Creating script modules...')
+#artifact_dir = '../artifact'
+#os.makedirs(artifact_dir, exist_ok=True)
+#sm_g_x_to_y = torch.jit.script(G_XtoY)
+#sm_g_x_to_y.save(os.path.join(artifact_dir, 'summer_to_winter.sm'))
+#sm_g_y_to_x = torch.jit.script(G_YtoX)
+#sm_g_y_to_x.save(os.path.join(artifact_dir, 'winter_to_summer.sm'))
+#
+#
+## Test the script modules
+#print('Testing the script modules...')
+#
+#batch = next(iter(testloader_X))
+#scaled_img = scale(batch[0][0])
+#test_y = sm_g_x_to_y(scaled_img.unsqueeze(0))
+#print('x -> y:', test_y.shape)
+#
+#batch = next(iter(testloader_Y))
+#scaled_img = scale(batch[0][0])
+#test_x = sm_g_y_to_x(scaled_img.unsqueeze(0))
+#print('y -> x:', test_x.shape)
 
 print('Done!')
