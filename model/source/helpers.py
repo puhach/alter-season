@@ -157,16 +157,3 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='sample
     imageio.imwrite(path, grid_yx)
     #print('Saved {}'.format(path))
 
-
-def export_script_modules(G_XtoY, G_YtoX, epoch, export_dir):
-    """
-    Convert the generators from PyTorch models to TorchScript modules, which can be loaded from a C++ program.
-    """
-
-    os.makedirs(export_dir, exist_ok=True)
-    sm_g_x_to_y = torch.jit.script(G_XtoY.cpu())
-    sm_g_x_to_y.save(os.path.join(export_dir, 'summer_to_winter_e{:05d}.sm'.format(epoch)))
-    sm_g_y_to_x = torch.jit.script(G_YtoX.cpu())
-    sm_g_y_to_x.save(os.path.join(export_dir, 'winter_to_summer_e{:05d}.sm'.format(epoch)))
-
-

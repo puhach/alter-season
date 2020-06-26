@@ -2,8 +2,8 @@ from dataloader import get_data_loader
 from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss, identity_mapping_loss
 #from preprocess import scale
-from helpers import scale, print_models, save_samples, export_script_modules
-from checkpoint import save_checkpoint, load_checkpoint
+from helpers import scale, print_models, save_samples
+from checkpoint import save_checkpoint, load_checkpoint, export_script_module
 import torch
 import torch.optim as optim
 import os
@@ -182,7 +182,8 @@ def train(train_dataloader_X, train_dataloader_Y,
             epoch_loss_d_x += d_x_loss.item()
             epoch_loss_d_y += d_y_loss.item()
             epoch_loss_g += g_total_loss.item()
-        
+
+            
 
         # Reset the iterators when epoch ends
         iter_X = iter(train_dataloader_X)
@@ -212,7 +213,9 @@ def train(train_dataloader_X, train_dataloader_Y,
         # Save the model parameters
         if epoch % checkpoint_every == 0 or epoch == n_epochs:
             save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, '../checkpoints')
-            export_script_modules(G_XtoY, G_YtoX, epoch, '../artifacts')
+            #export_script_modules(G_XtoY, G_YtoX, epoch, '../artifacts')
+            export_script_module(G_XtoY, '../artifacts', 'summer_to_winter_{:05d}.sm'.format(epoch))   
+            export_script_module(G_YtoX, '../artifacts', 'winter_to_summer_{:05d}.sm'.format(epoch))             
 
     return losses
 

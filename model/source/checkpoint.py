@@ -1,5 +1,6 @@
 import os
 import torch
+import copy
 from discriminator import Discriminator
 from generator import CycleGenerator
 
@@ -90,4 +91,40 @@ def load_checkpoint(checkpoint_dir, device):
     D_X = load_instance(Discriminator, os.path.join(checkpoint_dir, 'd_x.pt'), device)
     D_Y = load_instance(Discriminator, os.path.join(checkpoint_dir, 'd_y.pt'), device)
     return G_XtoY, G_YtoX, D_X, D_Y
+
+
+def export_script_module(G, export_dir, file_name):
+    """
+    Convert a PyTorch model to a TorchScript module, which can be loaded from a C++ program.
+    """
+    os.makedirs(export_dir, exist_ok=True)
+    
+    G_cpu = G.__class__(G.get_init_params())
+    G_cpu.load_state_dict(G.state_dict())
+
+    sm = torch.jit.script(G_cpu)
+    sm.save(os.path.join(export_dir, file_name))
+
+
+#def export_script_modules(G_XtoY, G_YtoX, epoch, export_dir):
+#    """
+#    Convert the generators from PyTorch models to TorchScript modules, which can be loaded from a C++ program.
+#    """
+#
+#    os.makedirs(export_dir, exist_ok=True)    
+#    
+#    #sm_g_x_to_y = torch.jit.script(G_XtoY.cpu())
+#    G_XtoY_cpu = CycleGenerator(G_XtoY.get_init_params())
+#    G_XtoY_cpu.load_state_dict(G_XtoY.state_dict())
+#    sm_g_x_to_y = torch.jit.script(G_XtoY_cpu)
+#
+#    # sm_g_y_to_x = torch.jit.script(G_YtoX.cpu())
+#    G_YtoX_cpu = CycleGenerator(G_YtoX.get_init_params())
+#    G_YtoX_cpu.load_state_dict(G_YtoX.state_dict())
+#    sm_g_y_to_x = torch.jit.script(G_YtoX_cpu)
+#
+#    sm_g_x_to_y.save(os.path.join(export_dir, 'summer_to_winter_e{:05d}.sm'.format(epoch)))
+#    
+#    sm_g_y_to_x.save(os.path.join(export_dir, 'winter_to_summer_e{:05d}.sm'.format(epoch)))
+
 
