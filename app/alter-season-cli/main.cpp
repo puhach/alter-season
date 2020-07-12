@@ -12,6 +12,9 @@
 #include <iostream>
 #include <memory>
 
+//#include <filesystem>	
+
+
 int main(int argc, const char* argv[])
 {
 	if (argc != 3)
@@ -19,6 +22,8 @@ int main(int argc, const char* argv[])
 		std::cerr << "Usage: alter-season-cli.exe <path-to-exported-script-module> <path-to-the-input-image>\n";
 		return -1;
 	}
+
+	//std::cout << std::filesystem::current_path() << std::endl;
 
 	//for (int i = 0; i < argc; ++i)
 	//	std::cout << argv[i] << std::endl;
@@ -52,6 +57,8 @@ int main(int argc, const char* argv[])
 		if (inputImg.empty())
 			throw std::exception("Failed to read the input image.");
 
+		//cv::imshow("input", inputImg);
+
 		// Convert BGR -> RGB
 		cv::cvtColor(inputImg, inputImg, cv::COLOR_BGR2RGB);
 				
@@ -82,6 +89,15 @@ int main(int argc, const char* argv[])
 
 		// Create the input vector from the scaled image tensor
 		std::vector<torch::jit::IValue> inputs({ inputTensor });
+
+		// Pass the input vector to the generator and get the output as IValue 
+		// (a tagged union over the types supported by the TorchScript interpreter)
+		c10::IValue outputIV = module.forward(inputs);
+
+		// Convert the interpreter value to a Torch tensor
+		torch::Tensor outputTensor = outputIV.toTensor();
+
+		std::cout << outputTensor.sizes() << std::endl;
 
 	}
 	catch (const c10::Error& e)
