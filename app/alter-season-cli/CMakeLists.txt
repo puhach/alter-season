@@ -17,7 +17,7 @@ find_package(OpenCV REQUIRED)
 # Add source to this project's executable.
 add_executable (alter-season-cli "main.cpp" )
 
-set_property(TARGET alter-season-cli PROPERTY CXX_STANDARD 11)
+set_property(TARGET alter-season-cli PROPERTY CXX_STANDARD 17)
 
 
 target_link_libraries(alter-season-cli "${TORCH_LIBRARIES}" "${OpenCV_LIBS}")
