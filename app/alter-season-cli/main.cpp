@@ -99,6 +99,11 @@ int main(int argc, const char* argv[])
 
 		std::cout << outputTensor.sizes() << std::endl;
 
+		//outputTensor.detach_();
+		outputTensor = outputTensor.permute({ 0, 2, 3, 1 });		// BCHW -> BHWC
+
+		//at::print(std::cout, outputTensor, 100);
+
 	}
 	catch (const c10::Error& e)
 	{
