@@ -104,6 +104,10 @@ int main(int argc, const char* argv[])
 
 		//at::print(std::cout, outputTensor, 100);
 
+		// Scale back from [-1; +1] to [0; 255]
+		outputTensor.add_(1).mul_(255).div_(2);
+
+
 	}
 	catch (const c10::Error& e)
 	{
