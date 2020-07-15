@@ -9,20 +9,18 @@ import torchvision.transforms as transforms
 
 def get_data_loader(image_type, image_dir, shuffle=True,
                     image_size=128, batch_size=16, num_workers=0):
-    """Returns training and test data loaders for a given image type, either 'summer' or 'winter'. 
-       These images will be resized to 128x128x3, by default, converted into Tensors, and normalized.
+    """
+    Returns training and test data loaders for a given image type, either 'summer' or 'winter'. 
+    These images will be resized to image_size x image_size x 3 and converted into Tensors.
     """
     
-    # resize and normalize the images
-    # ? Crop to make images square ?
-    transform = transforms.Compose([transforms.Resize(image_size), # resize to 128x128
+    # resize the images
+    # TODO: consider cropping to make images square 
+    transform = transforms.Compose([transforms.Resize(image_size), 
                                     transforms.ToTensor()])
 
     # get training and test directories
     image_path = os.path.join(image_dir, image_type)
-    #image_path = './' + image_dir
-    #train_path = os.path.join(image_path, image_type)
-    #test_path = os.path.join(image_path, 'test_{}'.format(image_type))
 
     # define datasets using ImageFolder
     train_dataset = datasets.ImageFolder(image_path, transform)

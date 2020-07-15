@@ -1,7 +1,6 @@
 from dataloader import get_data_loader
 from display import imshow
 from cyclegan import create_model, real_mse_loss, fake_mse_loss, cycle_consistency_loss, identity_mapping_loss
-#from preprocess import scale
 from helpers import scale, print_models, save_samples
 from checkpoint import save_checkpoint, load_checkpoint, export_script_module
 import torch
@@ -20,16 +19,12 @@ def train(train_dataloader_X, train_dataloader_Y,
     # keep track of losses over time
     losses = []
 
-    #test_iter_X = iter(test_dataloader_X)
-    #test_iter_Y = iter(test_dataloader_Y)
-
     # Get some fixed data from domains X and Y for sampling. These are images that are held
     # constant throughout training, that allow us to inspect the model's performance.
     fixed_X = next(iter(test_dataloader_X))[0] #test_iter_X.next()[0]
     fixed_Y = next(iter(test_dataloader_Y))[0] #test_iter_Y.next()[0]
-    # make sure to scale to a range -1 to 1
-    #fixed_X = scale(fixed_X) 
-    #fixed_Y = scale(fixed_Y)
+    
+    # scale to a range -1 to 1
     fixed_X = scale(fixed_X.to(device))
     fixed_Y = scale(fixed_Y.to(device))
 
@@ -37,9 +32,6 @@ def train(train_dataloader_X, train_dataloader_Y,
     iter_X = iter(train_dataloader_X)
     iter_Y = iter(train_dataloader_Y)
     batches_per_epoch = min(len(iter_X), len(iter_Y))
-    #tmp = min(len(train_dataloader_X), len(train_dataloader_Y))
-
-    #bce_loss_crit = torch.nn.BCEWithLogitsLoss(reduction='mean')
 
     for epoch in range(1, n_epochs+1):
 
@@ -49,26 +41,12 @@ def train(train_dataloader_X, train_dataloader_Y,
 
         for _ in range(batches_per_epoch):
 
-            ## Reset iterators for each epoch
-            #if epoch % batches_per_epoch == 0:
-            #    iter_X = iter(train_dataloader_X)
-            #    iter_Y = iter(train_dataloader_Y)
-
-            # move images to GPU or CPU depending on what is passed in the device parameter
+            # move images to GPU or CPU depending on what is passed in the device parameter,
             # make sure to scale to a range -1 to 1
             images_X, _ = next(iter_X)
             images_X = scale(images_X.to(device))
-            #images_X, _ = iter_X.next()
-            #images_X = scale(images_X) 
-
-            #images_Y, _ = iter_Y.next()
             images_Y, _ = next(iter_Y)
-            #images_Y = scale(images_Y)        
             images_Y = scale(images_Y.to(device))
-
-            # move images to GPU or CPU depending on what is passed in the device parameter
-            #images_X = images_X.to(device)
-            #images_Y = images_Y.to(device)
 
 
             # ============================================
@@ -80,8 +58,6 @@ def train(train_dataloader_X, train_dataloader_Y,
             # Compute the discriminator losses on real images
             d_x_out = D_X(images_X)
             d_x_loss_real = real_mse_loss(d_x_out)
-            #d_x_loss_real = bce_loss_crit(d_x_out, torch.ones_like(d_x_out))
-            #d_x_loss_real = torch.nn.functional.binary_cross_entropy_with_logits(d_x_out, torch.ones_like(d_x_out))
             
             # Generate fake images that look like domain X based on real images in domain Y
             fake_x = G_YtoX(images_Y)
@@ -89,8 +65,6 @@ def train(train_dataloader_X, train_dataloader_Y,
             # Compute the fake loss for D_X
             d_x_out = D_X(fake_x)
             d_x_loss_fake = fake_mse_loss(d_x_out)
-            #d_x_loss_fake = bce_loss_crit(d_x_out, torch.zeros_like(d_x_out))
-            #d_x_loss_fake = torch.nn.functional.binary_cross_entropy_with_logits(d_x_out, torch.zeros_like(d_x_out))
             
             # Compute the total loss
             d_x_loss = d_x_loss_real + d_x_loss_fake
@@ -101,14 +75,10 @@ def train(train_dataloader_X, train_dataloader_Y,
             
             d_y_out = D_Y(images_Y) 
             d_y_real_loss = real_mse_loss(d_y_out)  # D_y disciminator loss on a real Y image
-            #d_y_real_loss = bce_loss_crit(d_y_out, torch.ones_like(d_y_out))
-            #d_y_real_loss = torch.nn.functional.binary_cross_entropy_with_logits(d_y_out, torch.ones_like(d_y_out))
             
             fake_y = G_XtoY(images_X) # generate fake Y image from the real X image
             d_y_out = D_Y(fake_y)
             d_y_fake_loss = fake_mse_loss(d_y_out) # compute D_y loss on a fake Y image
-            #d_y_fake_loss = bce_loss_crit(d_y_out, torch.zeros_like(d_y_out))
-            #d_y_fake_loss = torch.nn.functional.binary_cross_entropy_with_logits(d_y_out, torch.zeros_like(d_y_out))
             
             d_y_loss = d_y_real_loss + d_y_fake_loss
             
@@ -194,16 +164,12 @@ def train(train_dataloader_X, train_dataloader_Y,
             losses.append((epoch_loss_d_x, epoch_loss_d_y, epoch_loss_g))
             print('Epoch [{:5d}/{:5d}] | d_X_loss: {:6.4f} | d_Y_loss: {:6.4f} | g_total_loss: {:6.4f}'.format(
                     epoch, n_epochs, epoch_loss_d_x, epoch_loss_d_y, epoch_loss_g))
-            #losses.append((d_x_loss.item(), d_y_loss.item(), g_total_loss.item()))
-            #print('Epoch [{:5d}/{:5d}] | d_X_loss: {:6.4f} | d_Y_loss: {:6.4f} | g_total_loss: {:6.4f}'.format(
-            #        epoch, n_epochs, d_x_loss.item(), d_y_loss.item(), g_total_loss.item()))
 
             
         # Save the generated samples
         if epoch % sample_every == 0 or epoch == n_epochs:
             G_YtoX.eval() # set generators to eval mode for sample generation
             G_XtoY.eval()
-            #save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, device=device, batch_size=16, sample_dir='../samples')
             save_samples(epoch, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='../samples')
             G_YtoX.train()
             G_XtoY.train()
@@ -212,7 +178,6 @@ def train(train_dataloader_X, train_dataloader_Y,
         # Save the model parameters
         if epoch % checkpoint_every == 0 or epoch == n_epochs:
             save_checkpoint(G_XtoY, G_YtoX, D_X, D_Y, '../checkpoints')
-            #export_script_modules(G_XtoY, G_YtoX, epoch, '../artifacts')
             export_script_module(G_XtoY, '../artifacts', 'summer_to_winter_{:05d}.sm'.format(epoch))   
             export_script_module(G_YtoX, '../artifacts', 'winter_to_summer_{:05d}.sm'.format(epoch))             
 
@@ -269,19 +234,12 @@ print(f'Using {device} for training')
 trainloader_X = get_data_loader(image_type='summer', image_dir='../data/train', shuffle=True, image_size=image_size, batch_size=batch_size)
 trainloader_Y = get_data_loader(image_type='winter', image_dir='../data/train', shuffle=True, image_size=image_size, batch_size=batch_size)
 
-# TODO: remove test loaders later
 testloader_X = get_data_loader(image_type='summer', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 testloader_Y = get_data_loader(image_type='winter', image_dir='../data/test', shuffle=False, image_size=image_size, batch_size=batch_size)
 
 
-#device = 'cuda' if torch.cuda.is_available() else 'cpu'
-
 # instantiate the complete model
 G_XtoY, G_YtoX, D_X, D_Y = create_model(image_size=image_size, g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, device=device)
-
-## print the model architecture
-#print_models(G_XtoY, G_YtoX, D_X, D_Y)
-
 
 
 g_params = list(G_XtoY.parameters()) + list(G_YtoX.parameters())  # Get generator parameters

@@ -34,8 +34,10 @@ def create_model(image_size, g_conv_dim=64, d_conv_dim=64, n_res_blocks=6, devic
     return G_XtoY, G_YtoX, D_X, D_Y
 
 
+# TODO: consider using torch.nn.MSELoss and L1Loss instead
+
 def real_mse_loss(D_out):
-    # how close is the produced output to being "real"?
+    # how close is the produced output to being "real"?    
     return torch.mean((D_out - 1)**2)
 
 def fake_mse_loss(D_out):

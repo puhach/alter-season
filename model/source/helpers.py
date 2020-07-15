@@ -30,7 +30,7 @@ def conv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_norm
     Creates a convolutional layer with optional batch normalization.
     """
     layers = []
-    # TODO: ? Shouldn't bias be set to NOT batch_norm instead of always being False ? 
+    # TODO: ? shouldn't bias be set to NOT batch_norm instead of always being False ? 
     conv_layer = nn.Conv2d(in_channels=in_channels, out_channels=out_channels, 
                            kernel_size=kernel_size, stride=stride, padding=padding, bias=False)
     
@@ -48,7 +48,7 @@ def deconv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_no
     """
     layers = []
     # append transpose conv layer
-    # ?? Shouldn't we set bias to NOT batch_norm instead of always being False ?
+    # TODO: shouldn't we set bias to NOT batch_norm instead of always being False ?
     layers.append(nn.ConvTranspose2d(in_channels, out_channels, kernel_size, stride, padding, bias=False))
     # optional batch norm layer
     if batch_norm:
@@ -58,7 +58,8 @@ def deconv(in_channels, out_channels, kernel_size, stride=2, padding=1, batch_no
 
 # helper function for printing the model architecture
 def print_models(G_XtoY, G_YtoX, D_X, D_Y):
-    """Prints model information for the generators and discriminators.
+    """
+    Prints model information for the generators and discriminators.
     """
     print("                     G_XtoY                    ")
     print("-----------------------------------------------")
@@ -82,9 +83,6 @@ def print_models(G_XtoY, G_YtoX, D_X, D_Y):
 
 
 
-
-
-#def merge_images(sources, targets, batch_size=16):
 def merge_images(sources, targets):
     """
     Creates a grid consisting of pairs of columns, where the first column in
@@ -95,7 +93,6 @@ def merge_images(sources, targets):
     batch_size, channels, h, w = sources.shape
     rows = int(np.sqrt(batch_size))
     cols = int(math.ceil(batch_size / rows))
-    #merged = np.zeros([3, row*h, row*w*2])
     grid = np.zeros([channels, rows*h, cols*w*2], dtype=np.uint8)
     for idx, (s, t) in enumerate(zip(sources, targets)):
         i = idx // cols
@@ -108,21 +105,17 @@ def merge_images(sources, targets):
 
 def tensor_to_image(x):
     """
-    Converts a tensor to numpy array.
+    Converts a tensor to a numpy array.
     """
 
-    # scale back in pytorch, then convert to numpy    
-    x = x.add(1).mul_(255).div_(2)
+    # scale back from [-1,1] to [0,255]    
+    x = x.add(1).mul_(255).div_(2)  # x = ((x + 1)*255 / (2))
     
     if x.is_cuda:
         x = x.cpu()
 
-    x = x.data.numpy().astype(np.uint8)
+    x = x.data.numpy().astype(np.uint8) # convert to numpy
 
-    #if torch.cuda.is_available():
-    #    x = x.cpu()
-    #x = x.data.numpy()
-    #x = ((x + 1)*255 / (2)).astype(np.uint8) # rescale to 0-255
     return x
 
 
@@ -133,27 +126,17 @@ def save_samples(iteration, fixed_Y, fixed_X, G_YtoX, G_XtoY, sample_dir='sample
 
     os.makedirs(sample_dir, exist_ok=True)
 
-    ## TODO: don't move here, pass the moved tensor instead
-    ## move input data to the correct device
-    #fake_X = G_YtoX(fixed_Y.to(device))
-    #fake_Y = G_XtoY(fixed_X.to(device))    
     fake_X = G_YtoX(fixed_Y)
     fake_Y = G_XtoY(fixed_X)
 
     X, fake_X = tensor_to_image(fixed_X), tensor_to_image(fake_X)
     Y, fake_Y = tensor_to_image(fixed_Y), tensor_to_image(fake_Y)
     
-    #grid_xy = merge_images(X, fake_Y, batch_size)
     grid_xy = merge_images(X, fake_Y)
     path = os.path.join(sample_dir, 'sample-{:05d}-X-Y.png'.format(iteration))
-    #scipy.misc.imsave(path, merged)
     imageio.imwrite(path, grid_xy)
-    #print('Saved {}'.format(path))
     
-    #grid_yx = merge_images(Y, fake_X, batch_size)
     grid_yx = merge_images(Y, fake_X)
     path = os.path.join(sample_dir, 'sample-{:05d}-Y-X.png'.format(iteration))
-    #scipy.misc.imsave(path, merged)
     imageio.imwrite(path, grid_yx)
-    #print('Saved {}'.format(path))
 
