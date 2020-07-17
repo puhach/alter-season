@@ -107,7 +107,20 @@ int main(int argc, const char* argv[])
 		// Scale back from [-1; +1] to [0; 255]
 		outputTensor.add_(1).mul_(255).div_(2);
 
+		//size_t sz = outputTensor.itemsize();
 
+		outputTensor = outputTensor.to(torch::kU8);
+
+		cv::Mat outputImg(outputTensor.size(1), outputTensor.size(2), CV_8UC3);
+		
+		//std::memcpy(outputImg.data, outputTensor.data_ptr(), outputTensor.numel()*sizeof(torch::kU8));
+		std::memcpy(outputImg.data, outputTensor.data_ptr(), outputTensor.numel() * outputTensor.itemsize());
+
+		cv::cvtColor(outputImg, outputImg, cv::COLOR_RGB2BGR);
+
+		
+		cv::imshow("output", outputImg);		
+		cv::waitKey();
 	}
 	catch (const c10::Error& e)
 	{
