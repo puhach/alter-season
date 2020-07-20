@@ -3,11 +3,15 @@
 
 #include <QMainWindow>
 
+class QScrollArea;
+
 class MainWindow : public QMainWindow
 {
 public:
 	MainWindow();
 		
+private:
+	QScrollArea *scrollArea;
 };	// MainWindow
 
 
