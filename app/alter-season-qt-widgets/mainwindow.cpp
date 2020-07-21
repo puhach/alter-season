@@ -21,7 +21,8 @@
 
 
 MainWindow::MainWindow()
-	: QMainWindow()
+	: QMainWindow(nullptr, (Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint) 
+		& ~Qt::WindowContextHelpButtonHint)
 	, scrollArea(new QScrollArea)
 	, imageArea(new ImageArea(tr("Drag and drop an image here")))
 {
