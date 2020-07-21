@@ -1,6 +1,8 @@
 #include "mainwindow.h"
 #include "imagearea.h"
 
+#include <QGuiApplication>
+#include <QScreen>
 #include <QScrollArea>
 #include <QScrollBar>
 #include <QMimeData>
@@ -68,7 +70,7 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* evt)
 void MainWindow::dropEvent(QDropEvent* evt)
 {
 	const QMimeData* mimeData = evt->mimeData();
-	qDebug() << mimeData->urls();
+	//qDebug() << mimeData->urls();
 	for (const auto& url : mimeData->urls())
 	{
 		QString localFilePath = url.toLocalFile();
@@ -78,22 +80,10 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			QImage image(localFilePath);
 			this->imageArea->setPixmap(QPixmap::fromImage(image));
 			
-			
+			QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();
+			if (image.height() < desktopSize.height()/2 && image.width() < desktopSize.width()/2)
 			{
-				//this->imageArea->resize(image.width(), image.height());
-				//this->imageArea->setMinimumSize(image.width(), image.height());
-				//this->imageArea->adjustSize();
 				this->resize(image.size().grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins()));
-				//this->adjustSize();
-				//QTimer::singleShot(10, [this] {
-				//		qDebug() << this->scrollArea->size() << this->scrollArea->maximumViewportSize() 
-				//			<< this->scrollArea->viewport()->sizeHint() << this->imageArea->minimumSizeHint()
-				//			<< this->minimumSizeHint() << this->scrollArea->contentsMargins() << this->contentsMargins()
-				//			<< this->imageArea->contentsMargins();
-				//		this->resize(this->imageArea->minimumSizeHint() + QSize(2,2));
-				//		//this->adjustSize();
-				//	});
-				
 			}
 
 			return evt->accept();
