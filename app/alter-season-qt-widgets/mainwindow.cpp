@@ -2,10 +2,12 @@
 #include "imagearea.h"
 
 #include <QScrollArea>
+#include <QScrollBar>
 #include <QMimeData>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileInfo>
+#include <QTimer>	// TEST!
 #include <QDebug>
 
 
@@ -22,9 +24,14 @@ MainWindow::MainWindow()
 {
 	setWindowTitle(tr("Alter Season"));
 	
+	// We ensure that the label will scale its contents to fill all available space. 
+	// If we omitted to set the imageLabel's scaledContents property, scaling would 
+	// enlarge the QLabel, but leave the pixmap at its original size, exposing the QLabel's background.
 	//this->imageArea->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 	this->imageArea->setScaledContents(true);
-	this->imageArea->setText(tr("<p align='center' style=\"font-size:16pt; color:brown; background: white\">Drag and drop an image here...</p>"));
+	//this->imageArea->setText(tr("<p align='center' style=\"font-size:16pt; color:brown; background: white\">Drag and drop an image here...</p>"));
+	this->imageArea->setText(tr("Drag and drop an image here"));
+	this->imageArea->setStyleSheet("QLabel { background: solid white; color: red; font: 16pt }");
 	
 	//QPixmap::loadFromData
 	//this->imageArea->setPixmap(QPixmap::fromImage(QImage("z:/test.jpg")));
@@ -33,7 +40,7 @@ MainWindow::MainWindow()
 
 	this->scrollArea->setWidget(this->imageArea);
 
-	//this->scrollArea->setWidgetResizable(true);
+	this->scrollArea->setWidgetResizable(true);
 	setCentralWidget(this->scrollArea);
 	//setMinimumSize(500, 500);
 	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
@@ -70,6 +77,26 @@ void MainWindow::dropEvent(QDropEvent* evt)
 		{
 			QImage image(localFilePath);
 			this->imageArea->setPixmap(QPixmap::fromImage(image));
+			
+			
+			{
+				//this->imageArea->resize(image.width(), image.height());
+				//this->imageArea->setMinimumSize(image.width(), image.height());
+				//this->imageArea->adjustSize();
+				this->resize(image.size().grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins()));
+				//this->adjustSize();
+				//QTimer::singleShot(10, [this] {
+				//		qDebug() << this->scrollArea->size() << this->scrollArea->maximumViewportSize() 
+				//			<< this->scrollArea->viewport()->sizeHint() << this->imageArea->minimumSizeHint()
+				//			<< this->minimumSizeHint() << this->scrollArea->contentsMargins() << this->contentsMargins()
+				//			<< this->imageArea->contentsMargins();
+				//		this->resize(this->imageArea->minimumSizeHint() + QSize(2,2));
+				//		//this->adjustSize();
+				//	});
+				
+			}
+
+			return evt->accept();
 		}
 	}
 
