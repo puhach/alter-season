@@ -9,7 +9,8 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileInfo>
-#include <QTimer>	// TEST!
+//#include <QTimer>	// TEST!
+//#include <QFontMetrics>
 #include <QDebug>
 
 
@@ -25,7 +26,8 @@ MainWindow::MainWindow()
 	, imageArea(new ImageArea(tr("Drag and drop an image here")))
 {
 	setWindowTitle(tr("Alter Season"));
-	
+	setAcceptDrops(true);
+
 	// We ensure that the label will scale its contents to fill all available space. 
 	// If we omitted to set the imageLabel's scaledContents property, scaling would 
 	// enlarge the QLabel, but leave the pixmap at its original size, exposing the QLabel's background.
@@ -33,7 +35,7 @@ MainWindow::MainWindow()
 	this->imageArea->setScaledContents(true);
 	//this->imageArea->setText(tr("<p align='center' style=\"font-size:16pt; color:brown; background: white\">Drag and drop an image here...</p>"));
 	//this->imageArea->setText(tr("Drag and drop an image here"));
-	this->imageArea->setStyleSheet("QLabel { background: solid white; color: red; font: 16pt }");
+	this->imageArea->setStyleSheet("QLabel { background: solid white; color: red; font: 16pt; }");
 	
 	//QPixmap::loadFromData
 	//this->imageArea->setPixmap(QPixmap::fromImage(QImage("z:/test.jpg")));
@@ -41,12 +43,20 @@ MainWindow::MainWindow()
 	//this->imageArea->setPixmap(QPixmap::fromImage(QImage("z:/small.jpg")));
 
 	this->scrollArea->setWidget(this->imageArea);
-
 	this->scrollArea->setWidgetResizable(true);
 	setCentralWidget(this->scrollArea);
+
 	//setMinimumSize(500, 500);
-	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);
-	setAcceptDrops(true);
+	//QRect imrect = this->imageArea->contentsRect();
+	//QFontMetrics fontMetrics = this->imageArea->fontMetrics();
+	//auto brect = fontMetrics.boundingRect(imrect, Qt::AlignCenter | Qt::TextWordWrap, this->imageArea->text());
+	//auto sz1 = fontMetrics.size(Qt::TextSingleLine, this->imageArea->text());
+	//int sz = sz1.width();
+	int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
+	QSize winSize = QSize(sz, sz).grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins());
+	//qDebug() << this->imageArea->sizeHint() << this->scrollArea->contentsMargins() << this->imageArea->contentsMargins() << this->contentsMargins();
+	resize(winSize);
+	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);	
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* evt)
@@ -80,11 +90,13 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			QImage image(localFilePath);
 			if (image.isNull())
 			{
-				this->imageArea->showMessage(tr("Failed to load the image"), 2000);
+				//this->resize(this->defaultSize);
+				this->imageArea->showMessage(tr("Failed to load the image"), 2000);				
 				QApplication::beep();
 			}	// failed to load the image
 			else
 			{
+				// TODO: stop the timer when showing image
 				this->imageArea->setPixmap(QPixmap::fromImage(image));
 
 				QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();

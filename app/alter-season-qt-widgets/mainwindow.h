@@ -26,6 +26,7 @@ private:
 
 	QScrollArea *scrollArea;
 	ImageArea* imageArea;
+	//QSize defaultSize;
 };	// MainWindow
 
 
