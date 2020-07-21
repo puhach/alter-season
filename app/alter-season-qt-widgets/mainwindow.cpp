@@ -1,7 +1,7 @@
 #include "mainwindow.h"
 #include "imagearea.h"
 
-#include <QGuiApplication>
+#include <QApplication>
 #include <QScreen>
 #include <QScrollArea>
 #include <QScrollBar>
@@ -22,7 +22,7 @@
 MainWindow::MainWindow()
 	: QMainWindow()
 	, scrollArea(new QScrollArea)
-	, imageArea(new ImageArea)
+	, imageArea(new ImageArea(tr("Drag and drop an image here")))
 {
 	setWindowTitle(tr("Alter Season"));
 	
@@ -32,7 +32,7 @@ MainWindow::MainWindow()
 	//this->imageArea->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Ignored);
 	this->imageArea->setScaledContents(true);
 	//this->imageArea->setText(tr("<p align='center' style=\"font-size:16pt; color:brown; background: white\">Drag and drop an image here...</p>"));
-	this->imageArea->setText(tr("Drag and drop an image here"));
+	//this->imageArea->setText(tr("Drag and drop an image here"));
 	this->imageArea->setStyleSheet("QLabel { background: solid white; color: red; font: 16pt }");
 	
 	//QPixmap::loadFromData
@@ -78,13 +78,21 @@ void MainWindow::dropEvent(QDropEvent* evt)
 		if (isImageFile(localFilePath))
 		{
 			QImage image(localFilePath);
-			this->imageArea->setPixmap(QPixmap::fromImage(image));
-			
-			QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();
-			if (image.height() < desktopSize.height()/2 && image.width() < desktopSize.width()/2)
+			if (image.isNull())
 			{
-				this->resize(image.size().grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins()));
-			}
+				this->imageArea->showMessage(tr("Failed to load the image"), 2000);
+				QApplication::beep();
+			}	// failed to load the image
+			else
+			{
+				this->imageArea->setPixmap(QPixmap::fromImage(image));
+
+				QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();
+				if (image.height() < desktopSize.height() / 2 && image.width() < desktopSize.width() / 2)
+				{
+					this->resize(image.size().grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins()));
+				}
+			}	// image loaded successfully
 
 			return evt->accept();
 		}
