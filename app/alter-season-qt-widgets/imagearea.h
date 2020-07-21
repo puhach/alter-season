@@ -6,12 +6,16 @@
 class ImageArea : public QLabel
 {
 public:
-	// TODO: add a title
-	ImageArea(QWidget* parent = nullptr);
+	ImageArea(const QString &text, QWidget* parent = nullptr);
+
+	//void showMessage(const QString& message, int duration);
 
 protected:
 	//virtual void dragEnterEvent(QDragEnterEvent* event) override;
 	//virtual void dropEvent(QDropEvent* event) override;
+
+private:
+	QString text;
 };	// ImageArea
 
 #endif  // IMAGEAREA_H
