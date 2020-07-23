@@ -3,22 +3,31 @@
 //#include <QDragEnterEvent>
 //#include <QDropEvent>
 //#include <QMimeData>
-//#include <QDebug>
+#include <QDebug>
 
-ImageArea::ImageArea(const QString &text, QWidget* parent)
+ImageArea::ImageArea(const QString &inscription, QWidget* parent)
 	: QLabel(parent)
-	, text(text)
+	, inscription(inscription)
 {
 	setAcceptDrops(true);
 	//setTextFormat(Qt::RichText);
 	setAlignment(Qt::AlignCenter);
-	setText(text);
+	setText(inscription);
+	setWordWrap(true);
+
+	this->messageTimer.setSingleShot(true);
+	connect(&this->messageTimer, &QTimer::timeout, this, [this] {
+			setText(this->inscription);
+			//adjustSize();
+			//qDebug() << this->sizeHint();
+		});
 }
-//
-//void ImageArea::showMessage(const QString& message, int duration)
-//{
-//
-//}
+
+void ImageArea::showMessage(const QString& message, int duration)
+{
+	this->setText(message);
+	this->messageTimer.start(duration);
+}
 
 //void ImageArea::dragEnterEvent(QDragEnterEvent* event)
 //{
