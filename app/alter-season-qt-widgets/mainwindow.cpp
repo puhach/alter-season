@@ -26,7 +26,6 @@ MainWindow::MainWindow()
 	, scrollArea(new QScrollArea)
 	, imageArea(new ImageArea(tr("Drag and drop an image here")))
 {
-	setWindowTitle(tr("Alter Season"));
 	setAcceptDrops(true);
 
 	// We ensure that the label will scale its contents to fill all available space. 
@@ -53,6 +52,7 @@ MainWindow::MainWindow()
 	//auto brect = fontMetrics.boundingRect(imrect, Qt::AlignCenter | Qt::TextWordWrap, this->imageArea->text());
 	//auto sz1 = fontMetrics.size(Qt::TextSingleLine, this->imageArea->text());
 	//int sz = sz1.width();
+	// TODO: consider using sizeHint instead
 	int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
 	QSize winSize = QSize(sz, sz).grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins());
 	//qDebug() << this->imageArea->sizeHint() << this->scrollArea->contentsMargins() << this->imageArea->contentsMargins() << this->contentsMargins();
@@ -97,14 +97,16 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			}	// failed to load the image
 			else
 			{
-				// TODO: stop the timer when showing image
-				this->imageArea->setPixmap(QPixmap::fromImage(image));
-
+				// TODO: consider using move semantics
+				this->imageArea->showImage(image);
+				
+				// TODO: consider using sizeHint instead
 				QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();
 				if (image.height() < desktopSize.height() / 2 && image.width() < desktopSize.width() / 2)
 				{
 					this->resize(image.size().grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins()));
 				}
+
 			}	// image loaded successfully
 
 			return evt->accept();

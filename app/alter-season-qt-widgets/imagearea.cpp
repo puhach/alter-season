@@ -1,5 +1,6 @@
 #include "imagearea.h"
 
+#include <QImage>
 //#include <QDragEnterEvent>
 //#include <QDropEvent>
 //#include <QMimeData>
@@ -23,10 +24,28 @@ ImageArea::ImageArea(const QString &inscription, QWidget* parent)
 		});
 }
 
+//QSize ImageArea::sizeHint() const
+//{
+//	if (this->pixmap())
+//		return QLabel::sizeHint();
+//	else
+//	{
+//		auto szHint = QLabel::sizeHint();
+//		int szMax = qMax(szHint.width(), szHint.height());
+//		return QSize(szMax, szMax);
+//	}
+//}
+
 void ImageArea::showMessage(const QString& message, int duration)
 {
 	this->setText(message);
 	this->messageTimer.start(duration);
+}
+
+void ImageArea::showImage(const QImage& image)
+{
+	this->setPixmap(QPixmap::fromImage(image));
+	this->messageTimer.stop();
 }
 
 //void ImageArea::dragEnterEvent(QDragEnterEvent* event)
