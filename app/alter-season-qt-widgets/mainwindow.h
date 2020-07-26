@@ -14,11 +14,15 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
-		
+	
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent *evt);
 	//virtual void dragMoveEvent(QDragMoveEvent *evt);
 	virtual void dropEvent(QDropEvent *evt);
+
+	virtual void mouseReleaseEvent(QMouseEvent *evt);
+
+	virtual QSize sizeHint() const;
 
 private:
 

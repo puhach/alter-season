@@ -52,12 +52,43 @@ MainWindow::MainWindow()
 	//auto brect = fontMetrics.boundingRect(imrect, Qt::AlignCenter | Qt::TextWordWrap, this->imageArea->text());
 	//auto sz1 = fontMetrics.size(Qt::TextSingleLine, this->imageArea->text());
 	//int sz = sz1.width();
-	// TODO: consider using sizeHint instead
-	int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
-	QSize winSize = QSize(sz, sz).grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins());
-	//qDebug() << this->imageArea->sizeHint() << this->scrollArea->contentsMargins() << this->imageArea->contentsMargins() << this->contentsMargins();
-	resize(winSize);
+
+	/// TODO: consider using sizeHint instead
+	//int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
+	//QSize winSize = QSize(sz, sz).grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins());
+	////qDebug() << this->imageArea->sizeHint() << this->scrollArea->contentsMargins() << this->imageArea->contentsMargins() << this->contentsMargins();
+	//resize(winSize);
 	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);	
+}
+
+QSize MainWindow::sizeHint() const
+{
+	auto pixmap = this->imageArea->pixmap();
+	QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();
+	QSize winSize;
+
+	if (pixmap)
+	{
+		winSize = this->imageArea->sizeHint();		
+	}
+	else // no pixmap
+	{
+		//qDebug() << this->imageArea->size() << this->imageArea->contentsRect();
+		//int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
+		//winSize = QSize(sz, sz);
+		QFontMetrics fontMetrics = this->imageArea->fontMetrics();
+		QSize textSize = fontMetrics.size(Qt::TextSingleLine, this->imageArea->text());
+		int squareSizeGuess = static_cast<int>(sqrt(textSize.width() * textSize.height()));
+		//int squareSizeGuess = static_cast<int>(sqrt(this->imageArea->width() * this->imageArea->height()));
+		QRect textRect = fontMetrics.boundingRect(0, 0, squareSizeGuess, squareSizeGuess, Qt::AlignCenter | Qt::TextWordWrap, this->imageArea->text());
+		int squareSize = qMax(textRect.width(), textRect.height()) + 10;	// bigger side + some padding
+		winSize = QSize(squareSize, squareSize);
+	}	// no pixmap
+	
+	if (winSize.height() > desktopSize.height() / 2 || winSize.width() > desktopSize.width() / 2)
+		winSize.scale(desktopSize / 2, Qt::KeepAspectRatio);
+
+	return winSize.grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins());
 }
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* evt)
@@ -93,27 +124,27 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			{
 				//this->resize(this->defaultSize);
 				this->imageArea->showMessage(tr("Failed to load the image"), 2000);				
-				QApplication::beep();
+				QApplication::beep();				
 			}	// failed to load the image
 			else
 			{
 				// TODO: consider using move semantics
 				this->imageArea->showImage(image);
 				
-				// TODO: consider using sizeHint instead
-				QSize desktopSize = qGuiApp->primaryScreen()->availableVirtualSize();
-				if (image.height() < desktopSize.height() / 2 && image.width() < desktopSize.width() / 2)
-				{
-					this->resize(image.size().grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins()));
-				}
-
 			}	// image loaded successfully
+
+			this->adjustSize();
 
 			return evt->accept();
 		}
 	}
 
 	evt->ignore();
+}
+
+void MainWindow::mouseReleaseEvent(QMouseEvent* evt)
+{
+	qDebug() << this->imageArea->size();
 }
 
 bool MainWindow::isImageFile(const QString &fileName) const
