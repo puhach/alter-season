@@ -73,16 +73,25 @@ QSize MainWindow::sizeHint() const
 	}
 	else // no pixmap
 	{
-		//qDebug() << this->imageArea->size() << this->imageArea->contentsRect();
-		//int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
-		//winSize = QSize(sz, sz);
+		auto square = [](const auto& s) -> int
+		{
+			return s.width() * s.height();
+		};
+
+		auto bestSize = [&square](const QFontMetrics& fontMetrics, const QString& text) -> QSize
+		{
+			QSize textSize = fontMetrics.size(Qt::TextSingleLine, text);
+			int squareSizeGuess = static_cast<int>(sqrt(square(textSize)));
+			//int squareSizeGuess = static_cast<int>(sqrt(this->imageArea->width() * this->imageArea->height()));
+			QRect textRect = fontMetrics.boundingRect(0, 0, squareSizeGuess, squareSizeGuess, Qt::AlignCenter | Qt::TextWordWrap, text);
+			int squareSize = qMax(textRect.width(), textRect.height()) + 10;	// larger side + some padding
+			return QSize(squareSize, squareSize);
+		};
+
 		QFontMetrics fontMetrics = this->imageArea->fontMetrics();
-		QSize textSize = fontMetrics.size(Qt::TextSingleLine, this->imageArea->text());
-		int squareSizeGuess = static_cast<int>(sqrt(textSize.width() * textSize.height()));
-		//int squareSizeGuess = static_cast<int>(sqrt(this->imageArea->width() * this->imageArea->height()));
-		QRect textRect = fontMetrics.boundingRect(0, 0, squareSizeGuess, squareSizeGuess, Qt::AlignCenter | Qt::TextWordWrap, this->imageArea->text());
-		int squareSize = qMax(textRect.width(), textRect.height()) + 10;	// bigger side + some padding
-		winSize = QSize(squareSize, squareSize);
+		QSize messageSize = bestSize(fontMetrics, this->imageArea->text());
+		QSize inscriptionSize = bestSize(fontMetrics, this->imageArea->getInscription());
+		return square(messageSize) > square(inscriptionSize) ? messageSize : inscriptionSize;
 	}	// no pixmap
 	
 	if (winSize.height() > desktopSize.height() / 2 || winSize.width() > desktopSize.width() / 2)
