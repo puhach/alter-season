@@ -12,6 +12,21 @@ endif()
 
 find_package(Qt5 COMPONENTS Widgets REQUIRED)
 
+
+#if(CMAKE_BUILD_TYPE STREQUAL "Release")
+#	set(Torch_DIR "D:/dox/projects/AI/alter-season-cyclegan/app/common/libtorch-1.4-cpu-release/share/cmake/Torch")
+#else()
+#	set(Torch_DIR "D:/dox/projects/AI/alter-season-cyclegan/app/common/libtorch-1.4-cpu-debug/share/cmake/Torch")
+#endif()
+#message("Torch dir is " ${Torch_DIR})
+
+find_package(Torch REQUIRED)
+
+
+
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
+
+
 # TODO: use different targets for windows and linux
 add_executable(alter-season-qt-widgets
     imagearea.h
@@ -33,5 +48,5 @@ add_executable(alter-season-qt-widgets
 #endif()
 
 target_link_libraries(alter-season-qt-widgets Qt5::Widgets)
-
+target_link_libraries(alter-season-qt-widgets "${TORCH_LIBRARIES}")
 
