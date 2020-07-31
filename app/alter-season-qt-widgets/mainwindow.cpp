@@ -1,5 +1,6 @@
 #include "mainwindow.h"
 #include "imagearea.h"
+#include "conversionselectordlg.h"
 
 #include <QApplication>
 #include <QScreen>
@@ -12,7 +13,6 @@
 //#include <QTimer>	// TEST!
 //#include <QFontMetrics>
 #include <QDebug>
-
 
 //inline QLatin1String operator""_QL1(const char* str, std::size_t len)
 //{
@@ -133,16 +133,33 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			{
 				//this->resize(this->defaultSize);
 				this->imageArea->showMessage(tr("Failed to load the image"), 2000);				
+				this->adjustSize();
 				QApplication::beep();				
 			}	// failed to load the image
 			else
 			{
 				// TODO: consider using move semantics
 				this->imageArea->showImage(image);
+				this->adjustSize();
 				
+				ConversionSelectorDlg dlg(this);
+				switch (dlg.exec())
+				{
+				case ConversionSelectorDlg::Summer2Winter:
+					qDebug() << "Conversion from summer to winter selected";
+					break;
+					
+				case ConversionSelectorDlg::Winter2Summer:
+					qDebug() << "Conversion from winter to summer selected";
+					break;
+
+				default:
+					qDebug() << "It seems like the dialog was simply closed";
+				}	// switch
+
 			}	// image loaded successfully
 
-			this->adjustSize();
+			//this->adjustSize();
 
 			return evt->accept();
 		}
