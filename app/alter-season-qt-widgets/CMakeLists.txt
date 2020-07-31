@@ -32,6 +32,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
 # TODO: use different targets for windows and linux
 add_executable(alter-season-qt-widgets
+    conversionselectordlg.h
+    conversionselectordlg.cpp
     imagearea.h
     imagearea.cpp
     #mainwindow.ui
