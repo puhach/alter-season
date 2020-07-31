@@ -23,6 +23,9 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Torch REQUIRED)
 
 
+find_package(OpenCV REQUIRED)
+
+
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${TORCH_CXX_FLAGS}")
 
@@ -48,5 +51,5 @@ add_executable(alter-season-qt-widgets
 #endif()
 
 target_link_libraries(alter-season-qt-widgets Qt5::Widgets)
-target_link_libraries(alter-season-qt-widgets "${TORCH_LIBRARIES}")
+target_link_libraries(alter-season-qt-widgets "${OpenCV_LIBS}" "${TORCH_LIBRARIES}")
 
