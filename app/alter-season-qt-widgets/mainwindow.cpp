@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "imagearea.h"
 #include "conversionselectordlg.h"
+#include "converter.h"
 
 #include <QApplication>
 #include <QScreen>
@@ -60,6 +61,12 @@ MainWindow::MainWindow()
 	//resize(winSize);
 	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);	
 }
+
+// The compiler needs the definition of Converter to generate the default destructor for the enclosing class (MainWindow). 
+// We need to declare the destructor of MainWindow, and set this to default in the source file, such that the unique_ptr 
+// does not forcibly inline its own default deleter.
+MainWindow::~MainWindow() = default;
+
 
 QSize MainWindow::sizeHint() const
 {

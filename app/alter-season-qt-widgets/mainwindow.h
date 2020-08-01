@@ -3,6 +3,9 @@
 
 #include <QMainWindow>
 
+#include <memory>
+
+class Converter;
 class QScrollArea;
 class ImageArea;
 class QDragEnterEvent;
@@ -14,6 +17,7 @@ class MainWindow : public QMainWindow
 
 public:
 	MainWindow();
+	~MainWindow();
 	
 protected:
 	virtual void dragEnterEvent(QDragEnterEvent *evt);
@@ -28,6 +32,7 @@ private:
 
 	bool isImageFile(const QString &fileName) const;
 
+	std::unique_ptr<Converter> converter;
 	QScrollArea *scrollArea;
 	ImageArea* imageArea;
 	//QSize defaultSize;
