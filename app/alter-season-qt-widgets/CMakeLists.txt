@@ -54,6 +54,20 @@ add_executable(alter-season-qt-widgets
     #target_set_property(TARGET alter-season-qt-widgets PROPERTY WIN32_EXECUTABLE true)
 #endif()
 
+# The following code block is suggested to be used on Windows.
+# According to https://github.com/pytorch/pytorch/issues/25457,
+# the DLLs need to be copied to avoid memory errors.
+if (MSVC)
+  file(GLOB TORCH_DLLS "${TORCH_INSTALL_PREFIX}/lib/*.dll")
+  add_custom_command(TARGET alter-season-qt-widgets
+                     POST_BUILD
+                     COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                     ${TORCH_DLLS}
+                     $<TARGET_FILE_DIR:alter-season-qt-widgets>)
+
+endif (MSVC)
+
+
 target_link_libraries(alter-season-qt-widgets Qt5::Widgets)
 target_link_libraries(alter-season-qt-widgets "${OpenCV_LIBS}" "${TORCH_LIBRARIES}")
 
