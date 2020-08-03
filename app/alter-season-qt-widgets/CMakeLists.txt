@@ -46,6 +46,7 @@ add_executable(alter-season-qt-widgets
     appicon.rc # https://forum.qt.io/topic/81519/how-to-set-the-application-icon-on-windows-using-cmake
 )
 
+
 # https://stackoverflow.com/questions/8249028/how-do-i-keep-my-qt-c-program-from-opening-a-console-in-windows
 #if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(alter-season-qt-widgets PROPERTIES 
@@ -53,6 +54,19 @@ add_executable(alter-season-qt-widgets
         CXX_STANDARD 17)
     #target_set_property(TARGET alter-season-qt-widgets PROPERTY WIN32_EXECUTABLE true)
 #endif()
+
+# Copy artifacts
+set(ARTIFACTS "${CMAKE_CURRENT_SOURCE_DIR}/../../model/artifacts")
+    #"${CMAKE_CURRENT_SOURCE_DIR}/../../model/artifacts/summer_to_winter_torch14_256x256_00100.sm;" 
+    #"${CMAKE_CURRENT_SOURCE_DIR}/../../model/artifacts/winter_to_summer_torch14_256x256_00100.sm")
+
+# Copy content of ${ARTIFACTS} directory to target-dir/artifacts directory. If the destination directory does not exist, it will be created. 
+add_custom_command(TARGET alter-season-qt-widgets
+                    POST_BUILD
+                    COMMAND ${CMAKE_COMMAND} -E copy_directory
+                    ${ARTIFACTS}
+                    "$<TARGET_FILE_DIR:alter-season-qt-widgets>/artifacts")
+
 
 # The following code block is suggested to be used on Windows.
 # According to https://github.com/pytorch/pytorch/issues/25457,
