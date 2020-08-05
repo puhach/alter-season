@@ -24,6 +24,8 @@
 MainWindow::MainWindow()
 	: QMainWindow(nullptr, (Qt::Dialog | Qt::WindowTitleHint | Qt::CustomizeWindowHint | Qt::WindowCloseButtonHint | Qt::WindowSystemMenuHint) 
 		& ~Qt::WindowContextHelpButtonHint)
+	, converterS2W(std::make_unique<Converter>("./artifacts/summer_to_winter_torch14_256x256_00100.sm"))
+	, converterW2S(std::make_unique<Converter>("./artifacts/winter_to_summer_torch14_256x256_00100.sm"))
 	, scrollArea(new QScrollArea)
 	, imageArea(new ImageArea(tr("Drag and drop an image here")))
 {
@@ -60,6 +62,9 @@ MainWindow::MainWindow()
 	////qDebug() << this->imageArea->sizeHint() << this->scrollArea->contentsMargins() << this->imageArea->contentsMargins() << this->contentsMargins();
 	//resize(winSize);
 	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);	
+
+	
+	//this->converter = std::make_unique<Converter>(QApplication::applicationDirPath() + "/" + );
 }
 
 // The compiler needs the definition of Converter to generate the default destructor for the enclosing class (MainWindow). 
@@ -109,6 +114,8 @@ QSize MainWindow::sizeHint() const
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* evt)
 {
+	//throw std::exception("My exception");
+
 	const QMimeData* mimeData = evt->mimeData();
 	//if (mimeData->hasUrls() && mimeData->urls().first().end)
 	for (const QUrl& url : mimeData->urls())

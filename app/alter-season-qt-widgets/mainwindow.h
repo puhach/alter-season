@@ -32,7 +32,7 @@ private:
 
 	bool isImageFile(const QString &fileName) const;
 
-	std::unique_ptr<Converter> converter;
+	std::unique_ptr<Converter> converterS2W, converterW2S;
 	QScrollArea *scrollArea;
 	ImageArea* imageArea;
 	//QSize defaultSize;
