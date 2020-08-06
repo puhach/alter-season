@@ -47,11 +47,14 @@ add_executable(alter-season-qt-widgets
 )
 
 
+
 # https://stackoverflow.com/questions/8249028/how-do-i-keep-my-qt-c-program-from-opening-a-console-in-windows
 #if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(alter-season-qt-widgets PROPERTIES 
         WIN32_EXECUTABLE true
-        CXX_STANDARD 17)
+        CXX_STANDARD 17
+        VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:alter-season-qt-widgets>"
+        )
     #target_set_property(TARGET alter-season-qt-widgets PROPERTY WIN32_EXECUTABLE true)
 #endif()
 
