@@ -28,6 +28,7 @@ public:
 private:
 	torch::jit::script::Module module;
 	//std::unique_ptr<torch::jit::script::Module> module;
+	int inputImageSize;
 };
 
 #endif // CONVERTER
