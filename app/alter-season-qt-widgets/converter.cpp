@@ -1,13 +1,56 @@
 #include "converter.h"
-#include <torch/script.h>
+#include "conversionfinishedevt.h"
+//#include <torch/script.h>
+
+#include <QApplication>
+#include <QtConcurrent>
+
 
 Converter::Converter(const std::string &modulePath)
-	: module(torch::jit::load(modulePath))
-	, inputImageSize(module.attr("image_size").toInt())
+	: QObject()
+	, module(torch::jit::load(modulePath))
 	//: module(std::make_unique<torch::jit::script::Module>(torch::jit::load(modulePath)))
+	, inputImageSize(module.attr("image_size").toInt())
 {
 	if (this->inputImageSize <= 0)
 		throw std::runtime_error("Failed to obtain the input image size.");
+
+	//connect(&this->watcher, QFutureWatcher<QImage>::finished, this, &Converter::onConversionFinished);
+	connect(&this->futureWatcher, &QFutureWatcher<QImage>::finished, this, [this] {
+			auto [img, receiver, error] = this->futureWatcher.result();
+			qApp->postEvent(receiver, new ConversionFinishedEvent(img, error));
+		});
 }
 
-//Converter::~Converter() = default;
+Converter::~Converter()
+{
+	this->futureWatcher.waitForFinished();
+}
+
+QImage Converter::convert(const QImage& image) const
+{
+	// TODO: not implemented
+
+	return QImage();
+}
+
+void Converter::convertAsync(const QImage& image, QObject* receiver) 
+{
+	// TODO: prevent using it while busy
+
+	this->futureWatcher.setFuture(QtConcurrent::run(this, &Converter::convert, image, receiver));
+}
+
+Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver) const
+{
+	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
+	
+}
+
+//std::tuple<int, QString&> Converter::testfunc(QString &s)
+//{
+//	std::tuple<int, QString&> tup1(2, s);
+//	//auto tup = std::forward_as_tuple(image, receiver, tr("Conversion failed: not implemented."));
+//	//return std::make_tuple(image, );
+//	return tup1;
+//}
