@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "imagearea.h"
 #include "conversionselectordlg.h"
+#include "conversionfinishedevt.h"
 #include "converter.h"
 
 #include <QApplication>
@@ -161,10 +162,14 @@ void MainWindow::dropEvent(QDropEvent* evt)
 				{
 				case ConversionSelectorDlg::Summer2Winter:
 					qDebug() << "Conversion from summer to winter selected";
+					//this->imageArea->showImage(this->converterS2W->convert(image));
+					this->converterS2W->convertAsync(image, this);
 					break;
 					
 				case ConversionSelectorDlg::Winter2Summer:
 					qDebug() << "Conversion from winter to summer selected";
+					//this->imageArea->showImage(this->converterW2S->convert(image));
+					this->converterW2S->convertAsync(image, this);
 					break;
 
 				default:
@@ -196,4 +201,27 @@ bool MainWindow::isImageFile(const QString &fileName) const
 	QFileInfo fileInfo(fileName);
 	QString suffix = fileInfo.suffix().toLower();
 	return imageExts.contains(suffix);
+}
+
+
+bool MainWindow::event(QEvent* e) 
+{
+	if (e->type() == ConversionFinishedEvent::ConversionFinishedEventType)
+	{
+		ConversionFinishedEvent* conversionFinishedEvt = static_cast<ConversionFinishedEvent*>(e);
+		
+		const QImage &image = conversionFinishedEvt->getImage();
+		if (image.isNull())
+			this->imageArea->showMessage(conversionFinishedEvt->getError(), 2000);
+		else
+		{
+			this->imageArea->showImage(image);
+		}
+
+		this->imageArea->adjustSize();
+
+		// This virtual function receives events to an object and should return true if the event e was recognized and processed.
+		return true;
+	}
+	else return QMainWindow::event(e);
 }

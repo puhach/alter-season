@@ -28,10 +28,13 @@ protected:
 
 	virtual QSize sizeHint() const;
 
+	virtual bool event(QEvent* e) override;
+
 private:
 
 	bool isImageFile(const QString &fileName) const;
 
+	// TODO: consider removing unique_ptr since the converters are now inherited from QObject and can use Qt's parent-child paradigm
 	std::unique_ptr<Converter> converterS2W, converterW2S;
 	QScrollArea *scrollArea;
 	ImageArea* imageArea;
