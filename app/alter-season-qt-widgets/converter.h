@@ -38,6 +38,8 @@ public:
 
 	void convertAsync(const QImage &image, QObject *receiver);
 
+	void cancel();
+
 private:
 
 	using ConversionResult = std::tuple<QImage, QObject*, QString>;
@@ -52,7 +54,7 @@ private:
 	int inputImageSize;
 	//QFutureWatcher<bool> futureWatcher;
 	QFutureWatcher<ConversionResult> futureWatcher;
-
+	//bool busy;
 };
 
 #endif // CONVERTER

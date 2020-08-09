@@ -143,6 +143,10 @@ void MainWindow::dropEvent(QDropEvent* evt)
 
 		if (isImageFile(localFilePath))
 		{
+			// Prevent the converted image from being shown when a new image has already been dropped
+			this->converterS2W->cancel();
+			this->converterW2S->cancel();
+
 			QImage image(localFilePath);
 			if (image.isNull())
 			{
@@ -181,7 +185,7 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			//this->adjustSize();
 
 			return evt->accept();
-		}
+		}	//	image file
 	}
 
 	evt->ignore();
