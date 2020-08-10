@@ -34,6 +34,8 @@ public:
 	// TODO: can we copy or move the converter?
 	~Converter();
 
+	bool isBusy() const { return busy; }
+
 	QImage convert(const QImage &image) const;
 
 	void convertAsync(const QImage &image, QObject *receiver);
@@ -54,7 +56,7 @@ private:
 	int inputImageSize;
 	//QFutureWatcher<bool> futureWatcher;
 	QFutureWatcher<ConversionResult> futureWatcher;
-	//bool busy;
+	bool busy;
 };
 
 #endif // CONVERTER
