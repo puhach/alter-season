@@ -32,6 +32,7 @@ Converter::Converter(const std::string &modulePath)
 //	this->futureWatcher.waitForFinished();
 //}
 
+
 QImage Converter::convert(const QImage& image) const
 {
 	// TODO: not implemented

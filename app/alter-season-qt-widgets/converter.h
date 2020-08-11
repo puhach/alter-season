@@ -32,7 +32,8 @@ class Converter: public QObject
 public:
 	// TODO: how about QString constructor?
 	Converter(const std::string &modulePath);
-	// TODO: can we copy or move the converter?
+	// QFutureSynchronizer cannot be copied or moved
+	Converter(const Converter& other) = delete;
 	~Converter() = default;
 
 	bool isBusy() const { return busy; }
@@ -51,6 +52,8 @@ private:
 	ConversionResult convert(const QImage &image, QObject *receiver) const;
 
 	//std::tuple<int, QString&> testfunc(QString &s);
+
+	Converter& operator = (const Converter& other) = delete;
 
 	torch::jit::script::Module module;
 	//std::unique_ptr<torch::jit::script::Module> module;
