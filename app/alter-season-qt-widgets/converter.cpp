@@ -16,6 +16,7 @@ Converter::Converter(const std::string &modulePath)
 	if (this->inputImageSize <= 0)
 		throw std::runtime_error("Failed to obtain the input image size.");
 
+	this->futureSynchronizer.setCancelOnWait(true);
 	//connect(&this->watcher, QFutureWatcher<QImage>::finished, this, &Converter::onConversionFinished);
 	connect(&this->futureWatcher, &QFutureWatcher<QImage>::finished, this, [this] {
 			if (!this->futureWatcher.isCanceled())
@@ -26,10 +27,10 @@ Converter::Converter(const std::string &modulePath)
 		});
 }
 
-Converter::~Converter()
-{
-	this->futureWatcher.waitForFinished();
-}
+//Converter::~Converter()
+//{
+//	this->futureWatcher.waitForFinished();
+//}
 
 QImage Converter::convert(const QImage& image) const
 {
@@ -40,9 +41,10 @@ QImage Converter::convert(const QImage& image) const
 
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
-	// TODO: prevent using it while busy
 	this->busy = true;
-	this->futureWatcher.setFuture(QtConcurrent::run(this, &Converter::convert, image, receiver));
+	const auto &future = QtConcurrent::run(this, &Converter::convert, image, receiver);
+	this->futureWatcher.setFuture(future);
+	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
 	this->busy = false;
 }
 

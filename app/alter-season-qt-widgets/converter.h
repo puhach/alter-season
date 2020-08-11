@@ -5,6 +5,7 @@
 
 #include <QImage>
 #include <QFutureWatcher>
+#include <QFutureSynchronizer>
 
 // A workaround for Qt/Torch name collision:
 // https://github.com/pytorch/pytorch/issues/19405
@@ -32,7 +33,7 @@ public:
 	// TODO: how about QString constructor?
 	Converter(const std::string &modulePath);
 	// TODO: can we copy or move the converter?
-	~Converter();
+	~Converter() = default;
 
 	bool isBusy() const { return busy; }
 
@@ -54,9 +55,10 @@ private:
 	torch::jit::script::Module module;
 	//std::unique_ptr<torch::jit::script::Module> module;
 	int inputImageSize;
+	bool busy;
 	//QFutureWatcher<bool> futureWatcher;
 	QFutureWatcher<ConversionResult> futureWatcher;
-	bool busy;
+	QFutureSynchronizer<ConversionResult> futureSynchronizer;
 };
 
 #endif // CONVERTER
