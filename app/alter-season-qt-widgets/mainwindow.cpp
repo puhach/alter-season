@@ -64,7 +64,6 @@ MainWindow::MainWindow()
 	//resize(winSize);
 	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);	
 
-	
 	//this->converter = std::make_unique<Converter>(QApplication::applicationDirPath() + "/" + );
 }
 

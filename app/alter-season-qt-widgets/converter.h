@@ -34,6 +34,7 @@ public:
 	Converter(const std::string &modulePath);
 	// QFutureSynchronizer cannot be copied or moved
 	Converter(const Converter& other) = delete;
+	Converter(Converter&& other) = delete;
 	~Converter() = default;
 
 	bool isBusy() const { return busy; }
@@ -54,6 +55,7 @@ private:
 	//std::tuple<int, QString&> testfunc(QString &s);
 
 	Converter& operator = (const Converter& other) = delete;
+	Converter& operator = (Converter && other) = delete;
 
 	torch::jit::script::Module module;
 	//std::unique_ptr<torch::jit::script::Module> module;
