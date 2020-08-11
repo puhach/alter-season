@@ -30,8 +30,9 @@ class Converter: public QObject
 	//Q_OBJECT
 
 public:
-	// TODO: how about QString constructor?
+	Converter(const QString &modulePath);
 	Converter(const std::string &modulePath);
+	
 	// QFutureSynchronizer cannot be copied or moved
 	Converter(const Converter& other) = delete;
 	Converter(Converter&& other) = delete;

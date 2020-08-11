@@ -5,6 +5,7 @@
 #include <QApplication>
 #include <QtConcurrent>
 
+Converter::Converter(const QString &modulePath): Converter(modulePath.toStdString()) {}
 
 Converter::Converter(const std::string &modulePath)
 	: QObject()
