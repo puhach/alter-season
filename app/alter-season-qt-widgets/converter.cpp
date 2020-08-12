@@ -46,7 +46,7 @@ QImage Converter::convert(const QImage& image) const
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
 	this->busy = true;
-	const auto &future = QtConcurrent::run(this, &Converter::convert, image, receiver);
+	const auto &future = QtConcurrent::run(this, &Converter::convert, std::cref(image), receiver);
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
 	this->busy = false;
