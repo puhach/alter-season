@@ -43,6 +43,7 @@ public:
 	QImage convert(const QImage &image) const;
 
 	void convertAsync(const QImage &image, QObject *receiver);
+	
 
 	void cancel();
 
@@ -52,6 +53,8 @@ private:
 	///using ConversionResult = std::tuple<QImage, QObject, QString>;
 
 	ConversionResult convert(const QImage &image, QObject *receiver) const;
+	ConversionResult convert(std::shared_ptr<QImage> image, QObject *receiver) const;
+	//ConversionResult convert(QImage &&image, QObject *receiver) const;
 
 	//std::tuple<int, QString&> testfunc(QString &s);
 

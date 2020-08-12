@@ -46,17 +46,32 @@ QImage Converter::convert(const QImage& image) const
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
 	this->busy = true;
-	const auto &future = QtConcurrent::run(this, &Converter::convert, std::cref(image), receiver);
+	const auto &future = QtConcurrent::run(this
+		// help the compiler to pick the right overload
+		//, &Converter::convert, 
+		//, static_cast<Converter::ConversionResult (Converter::*)(const QImage&, QObject *) const>(&Converter::convert),
+		, qConstOverload<const QImage &, QObject *>(&Converter::convert)
+		, std::cref(image)
+		, receiver);
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
 	this->busy = false;
 }
 
+
 Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver) const
 {
+	qDebug() << image.size();
 	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
 	
 }
+
+Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QObject* receiver) const
+{
+	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
+}
+
+
 
 void Converter::cancel()
 {
