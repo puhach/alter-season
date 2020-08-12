@@ -7,6 +7,8 @@
 
 Converter::Converter(const QString &modulePath): Converter(modulePath.toStdString()) {}
 
+Converter::Converter(const char* modulePath) : Converter(std::string(modulePath)) {}
+
 Converter::Converter(const std::string &modulePath)
 	: QObject()
 	, module(torch::jit::load(modulePath))

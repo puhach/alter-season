@@ -32,7 +32,7 @@ class Converter: public QObject
 public:
 	Converter(const QString &modulePath);
 	Converter(const std::string &modulePath);
-	
+	Converter(const char *modulePath);
 	// QFutureSynchronizer cannot be copied or moved
 	Converter(const Converter& other) = delete;
 	Converter(Converter&& other) = delete;
