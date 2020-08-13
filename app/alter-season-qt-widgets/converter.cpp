@@ -1,6 +1,7 @@
 #include "converter.h"
 #include "conversionfinishedevt.h"
 //#include <torch/script.h>
+#include <opencv2/core.hpp>
 
 #include <QApplication>
 #include <QtConcurrent>
@@ -46,15 +47,21 @@ QImage Converter::convert(const QImage& image) const
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
 	this->busy = true;
+
+	/// TEST!
+	//convert(image, receiver);
+
+	// QtConcurrent::run will make a copy of the image
 	const auto &future = QtConcurrent::run(this
 		// help the compiler to pick the right overload
 		//, &Converter::convert, 
 		//, static_cast<Converter::ConversionResult (Converter::*)(const QImage&, QObject *) const>(&Converter::convert),
 		, qConstOverload<const QImage &, QObject *>(&Converter::convert)
-		, std::cref(image)
+		, image //, std::cref(image)
 		, receiver);
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
+
 	this->busy = false;
 }
 
@@ -74,10 +81,10 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 }
 
 Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver) const
+//cv::Mat Converter::convert(const QImage& image, QObject* receiver) const
 {
-	qDebug() << image.size();
 	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
-	
+	//return cv::Mat();
 }
 
 Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QObject* receiver) const
