@@ -52,6 +52,7 @@ private:
 	using ConversionResult = std::tuple<QImage, QObject*, QString>;
 	///using ConversionResult = std::tuple<QImage, QObject, QString>;
 
+	//cv::Mat convert(const QImage& image, QObject* receiver) const;
 	ConversionResult convert(const QImage &image, QObject *receiver) const;
 	//ConversionResult convert(QImage image, QObject *receiver) const;
 	ConversionResult convert(std::shared_ptr<QImage> image, QObject *receiver) const;
