@@ -15,7 +15,6 @@ Converter::Converter(const char* modulePath) : Converter(std::string(modulePath)
 Converter::Converter(const std::string &modulePath)
 	: QObject()
 	, module(torch::jit::load(modulePath))
-	//: module(std::make_unique<torch::jit::script::Module>(torch::jit::load(modulePath)))
 	, inputImageSize(module.attr("image_size").toInt())
 	, busy(false)
 {
@@ -23,7 +22,7 @@ Converter::Converter(const std::string &modulePath)
 		throw std::runtime_error("Failed to obtain the input image size.");
 
 	this->futureSynchronizer.setCancelOnWait(true);
-	//connect(&this->watcher, QFutureWatcher<QImage>::finished, this, &Converter::onConversionFinished);
+	
 	connect(&this->futureWatcher, &QFutureWatcher<QImage>::finished, this, [this] {
 			if (!this->futureWatcher.isCanceled())
 			{
@@ -32,11 +31,6 @@ Converter::Converter(const std::string &modulePath)
 			}
 		});
 }
-
-//Converter::~Converter()
-//{
-//	this->futureWatcher.waitForFinished();
-//}
 
 
 QImage Converter::convert(const QImage& image) const
@@ -50,22 +44,22 @@ void Converter::convertAsync(const QImage& image, QObject* receiver)
 {
 	this->busy = true;
 
-	/// TEST!
-	//convert(image, receiver);
+	// Even const methods raise exceptions when called from a different thread on the image reference. This is probably
+	// because the original image leaves the scope and frees memory before/while this asynchronous method is executed.
+	// Therefore it is important to make a copy of the image (in our case QtConcurrent::run does it automatically).
 
-	// QtConcurrent::run will make a copy of the image
 	const auto &future = QtConcurrent::run(this
 		// help the compiler to pick the right overload
-		//, &Converter::convert, 
 		//, static_cast<Converter::ConversionResult (Converter::*)(const QImage&, QObject *) const>(&Converter::convert),
 		, qConstOverload<const QImage &, QObject *>(&Converter::convert)
 		, image //, std::cref(image)
 		, receiver);
+
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
 
 	this->busy = false;
-}
+}	// convertAsync
 
 void Converter::convertAsync(QImage&& image, QObject* receiver)
 {
@@ -83,7 +77,6 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 }
 
 Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver) const
-//cv::Mat Converter::convert(const QImage& image, QObject* receiver) const
 {
 	qDebug() << image.format();
 	if (image.format() != QImage::Format_RGB32 && image.format() != QImage::Format_ARGB32)
@@ -91,30 +84,6 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 
 	try
 	{
-		////QImage swappedImage = image.rgbSwapped();	// RGB->BGR, the original image is not changed
-		//const char * pbits = reinterpret_cast<const char*>(image.bits());
-		////std::unique_ptr<char[]> bitsCpy();
-		////auto bitsCpy = std::make_unique<char[]>(image.sizeInBytes());
-		////std::copy(pbits, pbits + image.sizeInBytes(), bitsCpy.get());
-		//char* bitsCpy = new char[image.sizeInBytes()];
-		//std::copy(pbits, pbits + image.sizeInBytes(), bitsCpy);
-		////cv::Mat mat(image.height(), image.width(), CV_8UC4, bitsCpy.get(), image.bytesPerLine());
-		//cv::Mat mat(image.height(), image.width(), CV_8UC4, bitsCpy, image.bytesPerLine());
-		////return mat;
-		////cv::imshow("test", mat);
-
-		//uchar* pbits = const_cast<QImage&>(image).bits();
-		////std::unique_ptr<char[]> bitsPtr();
-		//cv::Mat mat(image.height(), image.width(), CV_8UC4, pbits, image.bytesPerLine());
-		//QTimer::singleShot(0, this, [mat] {
-		//		cv::imshow("test", mat);
-		//	});
-		// delete pbits?
-		//delete[] pbits;
-		
-		// Even const methods raise exceptions when called from a different thread on the image reference. This is probably
-		// because the original image leaves the scope and frees memory before/while this asynchronous method is executed.
-		// Therefore it is important to make a copy of the image (in our case QtConcurrent::run does it automatically).
 		QImage resizedImage = image.scaled(this->inputImageSize, this->inputImageSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 		
 		at::Tensor inputTensor = torch::from_blob(resizedImage.bits()	// shared pixel data (does not perform a deep copy)
@@ -167,11 +136,3 @@ void Converter::cancel()
 {
 	this->futureWatcher.cancel();
 }
-
-//std::tuple<int, QString&> Converter::testfunc(QString &s)
-//{
-//	std::tuple<int, QString&> tup1(2, s);
-//	//auto tup = std::forward_as_tuple(image, receiver, tr("Conversion failed: not implemented."));
-//	//return std::make_tuple(image, );
-//	return tup1;
-//}

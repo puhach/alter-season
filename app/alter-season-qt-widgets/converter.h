@@ -15,14 +15,13 @@
 #include <torch/script.h>
 #define slots Q_SLOTS
 
-
-
 //#include <memory>
 //
 //namespace torch::jit::script
 //{
 //	struct Module;
 //}
+
 
 class Converter: public QObject
 {
@@ -50,26 +49,19 @@ public:
 private:
 
 	using ConversionResult = std::tuple<QImage, QObject*, QString>;
-	///using ConversionResult = std::tuple<QImage, QObject, QString>;
 
-	//cv::Mat convert(const QImage& image, QObject* receiver) const;
 	ConversionResult convert(const QImage &image, QObject *receiver) const;
-	//ConversionResult convert(QImage image, QObject *receiver) const;
 	ConversionResult convert(std::shared_ptr<QImage> image, QObject *receiver) const;
 	//ConversionResult convert(QImage &&image, QObject *receiver) const;
-
-	//std::tuple<int, QString&> testfunc(QString &s);
 
 	Converter& operator = (const Converter& other) = delete;
 	Converter& operator = (Converter && other) = delete;
 
 	torch::jit::script::Module module;
-	//std::unique_ptr<torch::jit::script::Module> module;
 	int inputImageSize;
 	bool busy;
-	//QFutureWatcher<bool> futureWatcher;
 	QFutureWatcher<ConversionResult> futureWatcher;
 	QFutureSynchronizer<ConversionResult> futureSynchronizer;
-};
+};	//	Converter
 
 #endif // CONVERTER

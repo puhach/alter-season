@@ -41,11 +41,6 @@ MainWindow::MainWindow()
 	//this->imageArea->setText(tr("Drag and drop an image here"));
 	this->imageArea->setStyleSheet("QLabel { background: solid white; color: red; font: 16pt; }");
 	
-	//QPixmap::loadFromData
-	//this->imageArea->setPixmap(QPixmap::fromImage(QImage("z:/test.jpg")));
-	
-	//this->imageArea->setPixmap(QPixmap::fromImage(QImage("z:/small.jpg")));
-
 	this->scrollArea->setWidget(this->imageArea);
 	this->scrollArea->setWidgetResizable(true);
 	setCentralWidget(this->scrollArea);
@@ -127,15 +122,11 @@ void MainWindow::dragEnterEvent(QDragEnterEvent* evt)
 	evt->ignore();
 }
 
-//void MainWindow::dragMoveEvent(QDragMoveEvent* evt)
-//{
-//	evt->acceptProposedAction();
-//}
 
 void MainWindow::dropEvent(QDropEvent* evt)
 {
 	const QMimeData* mimeData = evt->mimeData();
-	//qDebug() << mimeData->urls();
+	
 	for (const auto& url : mimeData->urls())
 	{
 		QString localFilePath = url.toLocalFile();
@@ -199,7 +190,6 @@ bool MainWindow::isImageFile(const QString &fileName) const
 {
 	static const QSet<QString> imageExts = { "jpg", "jpeg", "png", "bmp", "gif" };
 	//static const QSet<QLatin1String> imageExts({ "jpg"_QL1, "jpeg"_QL1, "png"_QL1, "bmp"_QL1, "gif"_QL1 });
-	//static QStringList imageExts = { "jpg", "jpeg", "png", "bmp", "gif" };
 	
 	QFileInfo fileInfo(fileName);
 	QString suffix = fileInfo.suffix().toLower();
