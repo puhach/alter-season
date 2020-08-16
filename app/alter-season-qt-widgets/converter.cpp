@@ -91,18 +91,33 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 			, torch::TensorOptions().dtype(torch::kByte)	// data type of the elements stored in the tensor
 			);
 
-		// It looks like narrow_copy() has to be used rather than narrow(). Otherwise, the data layout cannot be correctly understood by memcpy().
-		at::Tensor inputSlice = inputTensor.narrow_copy(-1, 0, 3);	// discard the alpha channel
-		//auto inputSlice = inputTensor.narrow(-1, 0, 3);
-		//at::Tensor inputSlice = inputTensor.index({ "...", torch::indexing::Slice(0, 4)});
+
+		// Discard the alpha channel and convert the tensor to float.
+		// Since toType() returns a copy, we can use narrow() rather than narrow_copy() to obtain the tensor slice.
+		// If we didn't make a copy by toType() or any other method, we would have to use narrow_copy() rather than narrow() to 
+		// change the data layout so as to be understood by memcpy().
+		inputTensor = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
+		inputTensor.div_(255);
+		//at::Tensor inputSlice = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
+		///at::Tensor inputSlice = inputTensor.index({ "...", torch::indexing::Slice(0, 4)});
+
+		//
+		//// Scale to [-1; +1]
+		///inputSlice.div_(255);
+		//constexpr double maxPixel = +1, minPixel = -1;
+		//inputSlice.mul_(maxPixel - minPixel).add_(minPixel);
+
+		//// Scale back to [0; +1]
+		//inputSlice.add_(-minPixel).div_(maxPixel - minPixel);
 
 		// Verify that everything went fine
-		cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
-		//size_t szTensor = inputTensor.numel()* inputTensor.itemsize();
-		size_t szTensor = inputSlice.numel() * inputSlice.itemsize();
+		//cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
+		cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_32FC3);
+		size_t szTensor = inputTensor.numel()* inputTensor.itemsize();
+		//size_t szTensor = inputSlice.numel() * inputSlice.itemsize();
 		size_t szResized = resizedImage.sizeInBytes();
-		//std::memcpy(mat.data, inputTensor.data_ptr(), szTensor);
-		std::memcpy(mat.data, inputSlice.data_ptr(), szTensor);
+		std::memcpy(mat.data, inputTensor.data_ptr(), szTensor);
+		//std::memcpy(mat.data, inputSlice.data_ptr(), szTensor);
 		//at::print(std::cout, inputTensor, 100);
 		//QTimer::singleShot(0, this, [mat] {
 				//cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
