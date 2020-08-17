@@ -101,14 +101,14 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		//at::Tensor inputSlice = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
 		///at::Tensor inputSlice = inputTensor.index({ "...", torch::indexing::Slice(0, 4)});
 
-		//
-		//// Scale to [-1; +1]
-		///inputSlice.div_(255);
-		//constexpr double maxPixel = +1, minPixel = -1;
-		//inputSlice.mul_(maxPixel - minPixel).add_(minPixel);
+		
+		// Scale to [-1; +1]
+		//inputSlice.div_(255);
+		constexpr double maxPixel = +1, minPixel = -1;
+		inputTensor.mul_(maxPixel - minPixel).add_(minPixel);
 
-		//// Scale back to [0; +1]
-		//inputSlice.add_(-minPixel).div_(maxPixel - minPixel);
+		// Scale back to [0; +1]
+		inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
 
 		// Verify that everything went fine
 		//cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
