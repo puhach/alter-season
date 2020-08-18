@@ -51,7 +51,7 @@ void Converter::convertAsync(const QImage& image, QObject* receiver)
 	const auto &future = QtConcurrent::run(this
 		// help the compiler to pick the right overload
 		//, static_cast<Converter::ConversionResult (Converter::*)(const QImage&, QObject *) const>(&Converter::convert),
-		, qConstOverload<const QImage &, QObject *>(&Converter::convert)
+		, qOverload<const QImage &, QObject *>(&Converter::convert)
 		, image //, std::cref(image)
 		, receiver);
 
@@ -76,7 +76,7 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 	this->busy = false;
 }
 
-Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver) const
+Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver)
 {
 	qDebug() << image.format();
 	if (image.format() != QImage::Format_RGB32 && image.format() != QImage::Format_ARGB32)
@@ -100,7 +100,6 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		inputTensor.div_(255);
 		//at::Tensor inputSlice = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
 		///at::Tensor inputSlice = inputTensor.index({ "...", torch::indexing::Slice(0, 4)});
-
 		
 		// Scale to [-1; +1]
 		//inputSlice.div_(255);
