@@ -100,11 +100,14 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		inputTensor.div_(255);
 		//at::Tensor inputSlice = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
 		///at::Tensor inputSlice = inputTensor.index({ "...", torch::indexing::Slice(0, 4)});
-		
+				
 		// Scale to [-1; +1]
 		//inputSlice.div_(255);
 		constexpr double maxPixel = +1, minPixel = -1;
 		inputTensor.mul_(maxPixel - minPixel).add_(minPixel);
+
+		// Convert the channel order BHWC -> BCHW
+		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
 
 		// Scale back to [0; +1]
 		inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
