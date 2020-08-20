@@ -109,6 +109,19 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		// Convert the channel order BHWC -> BCHW
 		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
 
+		// Create the input vector from the scaled image tensor
+		std::vector<torch::jit::IValue> inputs({ inputTensor });
+
+		// Pass the input vector to the generator and get the output as IValue 
+		// (a tagged union over the types supported by the TorchScript interpreter)
+		c10::IValue outputIV = this->module.forward(inputs);
+
+		// Convert the interpreter value to a Torch tensor
+		torch::Tensor outputTensor = outputIV.toTensor();
+
+		std::cout << outputTensor.sizes() << std::endl;
+
+
 		// Scale back to [0; +1]
 		inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
 
