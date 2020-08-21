@@ -119,11 +119,13 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		// Convert the interpreter value to a Torch tensor
 		torch::Tensor outputTensor = outputIV.toTensor();
 
+		outputTensor = outputTensor.permute({ 0, 2, 3, 1 });		// BCHW -> BHWC
+
 		std::cout << outputTensor.sizes() << std::endl;
 
 
-		// Scale back to [0; +1]
-		inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
+		/// Scale back to [0; +1]
+		//inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
 
 		// Verify that everything went fine
 		//cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
