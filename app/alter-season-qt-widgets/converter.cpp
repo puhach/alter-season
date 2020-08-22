@@ -86,25 +86,31 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 	{
 		QImage resizedImage = image.scaled(this->inputImageSize, this->inputImageSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
 		
+		// Discard the alpha channel (the image will be stored using a 24-bit RGB format (8-8-8)).
+		// It looks like the color order is swapped without this function. 
+		resizedImage = resizedImage.convertToFormat(QImage::Format_RGB888);
+
 		at::Tensor inputTensor = torch::from_blob(resizedImage.bits()	// shared pixel data (does not perform a deep copy)
-			, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 4 })	// input shape
+			//, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 4 })	// input shape
+			, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 3 })	// input shape
 			, torch::TensorOptions().dtype(torch::kByte)	// data type of the elements stored in the tensor
 			);
 
 
+		inputTensor = inputTensor.toType(torch::kFloat);
+
 		// Discard the alpha channel and convert the tensor to float.
 		// Since toType() returns a copy, we can use narrow() rather than narrow_copy() to obtain the tensor slice.
 		// If we didn't make a copy by toType() or any other method, we would have to use narrow_copy() rather than narrow() to 
-		// change the data layout so as to be understood by memcpy().
-		inputTensor = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
-		inputTensor.div_(255);
-		//at::Tensor inputSlice = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
-		///at::Tensor inputSlice = inputTensor.index({ "...", torch::indexing::Slice(0, 4)});
+		// change the data layout so as to be understood by memcpy().		
+		//inputTensor = inputTensor.narrow(-1, 1, 3).toType(torch::kFloat);
+		//inputTensor = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
+		//inputTensor.div_(255);
 				
 		// Scale to [-1; +1]
 		//inputSlice.div_(255);
 		constexpr double maxPixel = +1, minPixel = -1;
-		inputTensor.mul_(maxPixel - minPixel).add_(minPixel);
+		inputTensor.mul_((maxPixel - minPixel)/255.0).add_(minPixel);
 
 		// Convert the channel order BHWC -> BCHW
 		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
@@ -123,26 +129,6 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 
 		std::cout << outputTensor.sizes() << std::endl;
 
-
-		/// Scale back to [0; +1]
-		//inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
-
-		// Verify that everything went fine
-		//cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
-		cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_32FC3);
-		size_t szTensor = inputTensor.numel()* inputTensor.itemsize();
-		//size_t szTensor = inputSlice.numel() * inputSlice.itemsize();
-		size_t szResized = resizedImage.sizeInBytes();
-		std::memcpy(mat.data, inputTensor.data_ptr(), szTensor);
-		//std::memcpy(mat.data, inputSlice.data_ptr(), szTensor);
-		//at::print(std::cout, inputTensor, 100);
-		//QTimer::singleShot(0, this, [mat] {
-				//cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
-				cv::imshow("test", mat);
-				cv::waitKey(0);
-		//	});
-
-		qDebug() << resizedImage.size();
 	}
 	catch (const std::exception& e)
 	{
