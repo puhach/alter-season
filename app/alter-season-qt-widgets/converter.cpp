@@ -78,24 +78,24 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 
 Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver)
 {
-	qDebug() << image.format();
-	if (image.format() != QImage::Format_RGB32 && image.format() != QImage::Format_ARGB32)
-		return std::make_tuple(QImage(), receiver, tr("Image format is not supported."));
+	//qDebug() << image.format();
+	//if (image.format() != QImage::Format_RGB32 && image.format() != QImage::Format_ARGB32)
+	//	return std::make_tuple(QImage(), receiver, tr("Image format is not supported."));
 
 	try
 	{
-		QImage resizedImage = image.scaled(this->inputImageSize, this->inputImageSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-		
-		// Discard the alpha channel (the image will be stored using a 24-bit RGB format (8-8-8)).
-		// It looks like the color order is swapped without this function. 
-		resizedImage = resizedImage.convertToFormat(QImage::Format_RGB888);
+		QImage resizedImage = image
+			// Resize the input image to the size expected by the generator
+			.scaled(this->inputImageSize, this->inputImageSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+			// Discard the alpha channel (the image will be stored using a 24-bit RGB format (8-8-8));
+			// it looks like the color order is swapped without this function
+			.convertToFormat(QImage::Format_RGB888);
 
 		at::Tensor inputTensor = torch::from_blob(resizedImage.bits()	// shared pixel data (does not perform a deep copy)
 			//, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 4 })	// input shape
 			, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 3 })	// input shape
 			, torch::TensorOptions().dtype(torch::kByte)	// data type of the elements stored in the tensor
 			);
-
 
 		inputTensor = inputTensor.toType(torch::kFloat);
 
@@ -105,7 +105,6 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		// change the data layout so as to be understood by memcpy().		
 		//inputTensor = inputTensor.narrow(-1, 1, 3).toType(torch::kFloat);
 		//inputTensor = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
-		//inputTensor.div_(255);
 				
 		// Scale to [-1; +1]
 		//inputSlice.div_(255);
