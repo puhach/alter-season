@@ -128,6 +128,13 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 
 		std::cout << outputTensor.sizes() << std::endl;
 
+		// Scale the output tensor to [0; 255]
+		outputTensor = outputTensor.add_(-minPixel).mul_(255.0 / (maxPixel - minPixel)).toType(torch::kU8);
+		/// Scale back to [0; +1]
+		//inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
+		
+		//at::print(std::cout, outputTensor, 10);
+
 	}
 	catch (const std::exception& e)
 	{
