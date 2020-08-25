@@ -135,6 +135,29 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		
 		//at::print(std::cout, outputTensor, 10);
 
+		cv::Mat outputImg(outputTensor.size(1), outputTensor.size(2), CV_8UC3);
+		std::memcpy(outputImg.data, outputTensor.data_ptr(), outputTensor.numel() * outputTensor.itemsize());
+		cv::cvtColor(outputImg, outputImg, cv::COLOR_RGB2BGR);
+		cv::imshow("output", outputImg);
+		cv::waitKey(0);
+
+
+		//// Verify that everything went fine
+		////cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
+		//cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_32FC3);
+		//size_t szTensor = inputTensor.numel()* inputTensor.itemsize();
+		////size_t szTensor = inputSlice.numel() * inputSlice.itemsize();
+		//size_t szResized = resizedImage.sizeInBytes();
+		//std::memcpy(mat.data, inputTensor.data_ptr(), szTensor);
+		////std::memcpy(mat.data, inputSlice.data_ptr(), szTensor);
+		////at::print(std::cout, inputTensor, 100);
+		////QTimer::singleShot(0, this, [mat] {
+		//		//cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+		//		cv::imshow("test", mat);
+		//		cv::waitKey(0);
+		////	});
+
+		//qDebug() << resizedImage.size();
 	}
 	catch (const std::exception& e)
 	{
