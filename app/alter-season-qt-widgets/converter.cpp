@@ -76,6 +76,11 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 	this->busy = false;
 }
 
+void imageCleanup(void* info)
+{
+	delete[] reinterpret_cast<char*>(info);
+}
+
 Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver)
 {
 	//qDebug() << image.format();
@@ -129,18 +134,41 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		std::cout << outputTensor.sizes() << std::endl;
 
 		// Scale the output tensor to [0; 255]
-		outputTensor = outputTensor.add_(-minPixel).mul_(255.0 / (maxPixel - minPixel)).toType(torch::kU8);
+		outputTensor = outputTensor.add_(-minPixel).mul_(255.0 / (maxPixel - minPixel)).clamp_(0, 255).toType(torch::kU8);
 		/// Scale back to [0; +1]
 		//inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
 		
 		//at::print(std::cout, outputTensor, 10);
 
-		cv::Mat outputImg(outputTensor.size(1), outputTensor.size(2), CV_8UC3);
+		/*cv::Mat outputImg(outputTensor.size(1), outputTensor.size(2), CV_8UC3);
 		std::memcpy(outputImg.data, outputTensor.data_ptr(), outputTensor.numel() * outputTensor.itemsize());
+		std::cout << outputImg.step << std::endl;
 		cv::cvtColor(outputImg, outputImg, cv::COLOR_RGB2BGR);
 		cv::imshow("output", outputImg);
-		cv::waitKey(0);
+		cv::waitKey(0);*/
 
+		//std::cout << outputTensor.nbytes() << " " << outputTensor.numel() << " " << outputTensor.itemsize() << " " << outputTensor.is_contiguous();
+		//std::cout << outputTensor.size(1) << " " << outputTensor.size(2) << std::endl;
+		//char* tensorData = new char[outputTensor.nbytes()];
+		uchar* tensorData = new uchar[outputTensor.nbytes()];
+		//std::copy(outputTensor.data_ptr<char*>(), outputTensor.data_ptr<char*>() + outputTensor.nbytes(), tensorData);
+		std::memcpy(tensorData, static_cast<uchar*>(outputTensor.data_ptr()), outputTensor.nbytes());
+		QImage outputImage(tensorData
+			, outputTensor.size(2)	// width
+			, outputTensor.size(1)	// height
+			, outputTensor.size(2)*outputTensor.size(3)*outputTensor.itemsize()		// width*channels*item
+			, QImage::Format_RGB888	// format
+			, imageCleanup	// QImage's destructor doesn't delete the data automatically
+			, tensorData);
+
+		if (outputImage.isNull())
+		{
+			// Free memory here since the output image's cleanup handler is not called for an uninitialized image
+			delete[] tensorData;
+			throw std::exception("Failed to create an image from the output tensor data.");
+		}
+
+		return std::make_tuple(outputImage, receiver, tr("OK."));
 
 		//// Verify that everything went fine
 		////cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
@@ -162,10 +190,9 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 	catch (const std::exception& e)
 	{
 		std::cerr << e.what() << std::endl;
+		return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
 	}
-
-	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
-}
+}	// convert
 
 Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QObject* receiver) const
 {
