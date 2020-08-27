@@ -32,6 +32,13 @@ Converter::Converter(const std::string &modulePath)
 		});
 }
 
+//Converter::~Converter()
+//{
+//	for (auto& fut : this->futureSynchronizer.futures())
+//	{
+//		qDebug() << fut.isCanceled() << fut.isFinished() << fut.isRunning() << fut.isStarted();
+//	}
+//}
 
 QImage Converter::convert(const QImage& image) const
 {
@@ -42,7 +49,11 @@ QImage Converter::convert(const QImage& image) const
 
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
+	// TODO: do we need it?
 	this->busy = true;
+		
+	clearFinishedFutures();	// release memory occupied by finished futures and associated data
+	
 
 	// Even const methods raise exceptions when called from a different thread on the image reference. This is probably
 	// because the original image leaves the scope and frees memory before/while this asynchronous method is executed.
@@ -64,6 +75,9 @@ void Converter::convertAsync(const QImage& image, QObject* receiver)
 void Converter::convertAsync(QImage&& image, QObject* receiver)
 {
 	this->busy = true;
+
+	clearFinishedFutures();	// release memory occupied by finished futures and associated data
+
 	//QImage* imagePtr = new QImage(std::move(image));
 	//auto imagePtr = std::make_shared<QImage>(std::move(image));
 
@@ -205,6 +219,25 @@ Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QO
 //	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
 //}
 
+// This function helps to release memory occupied by finished futures and associated image data.
+// Returns true if futures were removed and false otherwise.
+bool Converter::clearFinishedFutures()
+{
+	const auto& futures = this->futureSynchronizer.futures();
+	if (std::all_of(futures.begin(), futures.end(), [](const auto& fut) { return fut.isFinished(); }))
+	{
+		this->futureSynchronizer.clearFutures();
+		return true;
+	}
+	else return false;
+
+	/*for (auto& fut : this->futureSynchronizer.futures())
+	{
+		if (!fut.isFinished())
+			return false;
+	}*/
+		
+}	// clearFinishedFutures
 
 void Converter::cancel()
 {
