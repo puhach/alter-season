@@ -37,7 +37,7 @@ If you like to train the model in a cloud, the training data can be uploaded to 
 scp -i /directory/to/your-ssh-key.pem /your/local/file/to/copy user@ec2-xx-xx-xxx-xxx.compute-1.amazonaws.com:path/to/file 
 ```
 
-Extract the training data to 'model/data'.
+Extract the training data to `model/data`.
 
 The training script expects a folder structure which is different from the original dataset. Adjust it according to the tree below:
 ```
@@ -53,4 +53,29 @@ data
     └───winter
         └───winter
 ```
+
+## Training
+
+Run training from the `model/source` directory, e.g.:
+```
+python train.py --epochs 100 --device cuda 
+```
+
+The following table lists the command line arguments supported by the training script:
+| Parameter | Explanation |
+|-----------|-------------|
+|  -h, --help |        show this help message and exit |
+|  --device DEVICE |   The device to use for training. Defaults to CPU. |
+|  --epochs EPOCHS |   The number of epochs to train for. |
+|  --batch BATCH |     The batch size. Default is 16. |
+|  --imsize IMSIZE |   The size of input images. Defaults to 128. |
+|  --cpt CPT |         The checkpointing frequency. By default a checkpoint is saved every 10 epochs. |
+|  --sample SAMPLE |   The sampling frequency. By default sample images are  generated every 10 epochs. |
+|  --lr LR |           The learning rate. Default is 0.0001. |
+|  --beta1 BETA1 |     Beta1 parameter for the Adam optimizer. |
+|  --beta2 BETA2 |     Beta2 parameter for the Adam optimizer. |
+|  --rw RW |           Reconstruction loss weight. Default is 10. |
+|  --iw IW |           Identity mapping loss weight. Default is 1. |
+|  --balance BALANCE | If the ratio of the training loss to the loss of an  adversary becomes less than the balance value, training of the superior network will stop. Default is 0, which means discriminators and generators are unconstrained in their training progress. |
+
 
