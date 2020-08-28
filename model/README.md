@@ -1,0 +1,5 @@
+# Alter Season Model
+
+This project creates a generative model based on a CycleGAN architecture. The model should read an image from a summer set and transform it so that it looks as if it belongs to a winter set (or vice versa). A CycleGAN is designed for image-to-image translation and it learns from unpaired training data. This means that in order to train a generator to translate images from one domain to another, we don't need to have exact correspondences between individual images in those domains. For example, in the paper that introduced CycleGANs, the authors were able to translate between images of horses and zebras, even though there are no images of a zebra in exactly the same position as a horse or with exactly the same background, etc. To train the model we'll be using a set of images of Yosemite national park taken either during the summer of winter. The summer and winter seasons are the two domains for image-to-image translation.
+
+![summer-to-winter-cover](./assets/cover.jpg)
