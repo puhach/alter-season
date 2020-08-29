@@ -79,3 +79,6 @@ The following table lists the command line arguments supported by the training s
 |  --balance BALANCE | If the ratio of the training loss to the loss of an  adversary becomes less than the balance value, training of the superior network will stop. Default is 0, which means discriminators and generators are unconstrained in their training progress. |
 
 
+## Credits
+
+The project is based on the [CycleGAN lesson](https://classroom.udacity.com/nanodegrees/nd101/parts/2ea78ff8-befd-4046-b06e-5327871b0748/modules/ae797d2c-df0b-4aed-b586-955e8034c580/lessons/f5f47d94-6ed5-4adb-bf25-6d82601b0b8f/concepts/95118d2e-3129-42e8-8808-0ffacd907779) from the [Deep Learning Nanodegree](https://www.udacity.com/course/deep-learning-nanodegree--nd101) at Udacity and the original [CycleGAN paper](https://arxiv.org/abs/1703.10593).
