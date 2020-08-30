@@ -32,14 +32,6 @@ Converter::Converter(const std::string &modulePath)
 		});
 }
 
-//Converter::~Converter()
-//{
-//	for (auto& fut : this->futureSynchronizer.futures())
-//	{
-//		qDebug() << fut.isCanceled() << fut.isFinished() << fut.isRunning() << fut.isStarted();
-//	}
-//}
-
 QImage Converter::convert(const QImage& image) const
 {
 	// TODO: not implemented
@@ -97,10 +89,6 @@ void imageCleanup(void* info)
 
 Converter::ConversionResult Converter::convert(const QImage& image, QObject* receiver)
 {
-	//qDebug() << image.format();
-	//if (image.format() != QImage::Format_RGB32 && image.format() != QImage::Format_ARGB32)
-	//	return std::make_tuple(QImage(), receiver, tr("Image format is not supported."));
-
 	try
 	{
 		QImage resizedImage = image
@@ -111,22 +99,13 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 			.convertToFormat(QImage::Format_RGB888);
 
 		at::Tensor inputTensor = torch::from_blob(resizedImage.bits()	// shared pixel data (does not perform a deep copy)
-			//, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 4 })	// input shape
 			, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 3 })	// input shape
 			, torch::TensorOptions().dtype(torch::kByte)	// data type of the elements stored in the tensor
 			);
 
 		inputTensor = inputTensor.toType(torch::kFloat);
 
-		// Discard the alpha channel and convert the tensor to float.
-		// Since toType() returns a copy, we can use narrow() rather than narrow_copy() to obtain the tensor slice.
-		// If we didn't make a copy by toType() or any other method, we would have to use narrow_copy() rather than narrow() to 
-		// change the data layout so as to be understood by memcpy().		
-		//inputTensor = inputTensor.narrow(-1, 1, 3).toType(torch::kFloat);
-		//inputTensor = inputTensor.narrow(-1, 0, 3).toType(torch::kFloat);
-				
 		// Scale to [-1; +1]
-		//inputSlice.div_(255);
 		constexpr double maxPixel = +1, minPixel = -1;
 		inputTensor.mul_((maxPixel - minPixel)/255.0).add_(minPixel);
 
@@ -149,23 +128,9 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 
 		// Scale the output tensor to [0; 255]
 		outputTensor = outputTensor.add_(-minPixel).mul_(255.0 / (maxPixel - minPixel)).clamp_(0, 255).toType(torch::kU8);
-		/// Scale back to [0; +1]
-		//inputTensor.add_(-minPixel).div_(maxPixel - minPixel);
-		
-		//at::print(std::cout, outputTensor, 10);
 
-		/*cv::Mat outputImg(outputTensor.size(1), outputTensor.size(2), CV_8UC3);
-		std::memcpy(outputImg.data, outputTensor.data_ptr(), outputTensor.numel() * outputTensor.itemsize());
-		std::cout << outputImg.step << std::endl;
-		cv::cvtColor(outputImg, outputImg, cv::COLOR_RGB2BGR);
-		cv::imshow("output", outputImg);
-		cv::waitKey(0);*/
-
-		//std::cout << outputTensor.nbytes() << " " << outputTensor.numel() << " " << outputTensor.itemsize() << " " << outputTensor.is_contiguous();
-		//std::cout << outputTensor.size(1) << " " << outputTensor.size(2) << std::endl;
-		//char* tensorData = new char[outputTensor.nbytes()];
+		// Convert the output tensor data to a Qt image
 		uchar* tensorData = new uchar[outputTensor.nbytes()];
-		//std::copy(outputTensor.data_ptr<char*>(), outputTensor.data_ptr<char*>() + outputTensor.nbytes(), tensorData);
 		std::memcpy(tensorData, static_cast<uchar*>(outputTensor.data_ptr()), outputTensor.nbytes());
 		QImage outputImage(tensorData
 			, outputTensor.size(2)	// width
@@ -183,23 +148,6 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 		}
 
 		return std::make_tuple(outputImage, receiver, tr("OK."));
-
-		//// Verify that everything went fine
-		////cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_8UC3);
-		//cv::Mat mat(resizedImage.height(), resizedImage.width(), CV_32FC3);
-		//size_t szTensor = inputTensor.numel()* inputTensor.itemsize();
-		////size_t szTensor = inputSlice.numel() * inputSlice.itemsize();
-		//size_t szResized = resizedImage.sizeInBytes();
-		//std::memcpy(mat.data, inputTensor.data_ptr(), szTensor);
-		////std::memcpy(mat.data, inputSlice.data_ptr(), szTensor);
-		////at::print(std::cout, inputTensor, 100);
-		////QTimer::singleShot(0, this, [mat] {
-		//		//cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
-		//		cv::imshow("test", mat);
-		//		cv::waitKey(0);
-		////	});
-
-		//qDebug() << resizedImage.size();
 	}
 	catch (const std::exception& e)
 	{
@@ -230,13 +178,6 @@ bool Converter::clearFinishedFutures()
 		return true;
 	}
 	else return false;
-
-	/*for (auto& fut : this->futureSynchronizer.futures())
-	{
-		if (!fut.isFinished())
-			return false;
-	}*/
-		
 }	// clearFinishedFutures
 
 void Converter::cancel()
