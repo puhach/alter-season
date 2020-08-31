@@ -72,13 +72,16 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 
 	//QImage* imagePtr = new QImage(std::move(image));
 	//auto imagePtr = std::make_shared<QImage>(std::move(image));
+	//auto imagePtr = std::make_shared<QImage>(image);
 
 	const auto& future = QtConcurrent::run(this
 		, qConstOverload<std::shared_ptr<QImage>, QObject*>(&Converter::convert)
-		, std::make_shared<QImage>(image)
+		, std::make_shared<QImage>(std::move(image))
 		, receiver);
 
+	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);
+
 	this->busy = false;
 }
 
