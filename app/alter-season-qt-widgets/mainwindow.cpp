@@ -162,8 +162,10 @@ void MainWindow::dropEvent(QDropEvent* evt)
 					
 				case ConversionSelectorDlg::Winter2Summer:
 					qDebug() << "Conversion from winter to summer selected";
-					//this->imageArea->showImage(this->converterW2S->convert(image));
-					this->converterW2S->convertAsync(image, this);
+					///this->imageArea->showImage(this->converterW2S->convert(image));
+					//this->converterW2S->convertAsync(image, this);
+					// !TEST move semantics
+					this->converterW2S->convertAsync(std::move(image), this);
 					break;
 
 				default:

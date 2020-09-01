@@ -75,7 +75,7 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 	//auto imagePtr = std::make_shared<QImage>(image);
 
 	const auto& future = QtConcurrent::run(this
-		, qConstOverload<std::shared_ptr<QImage>, QObject*>(&Converter::convert)
+		, qOverload<std::shared_ptr<QImage>, QObject*>(&Converter::convert)
 		, std::make_shared<QImage>(std::move(image))
 		, receiver);
 
@@ -159,10 +159,72 @@ Converter::ConversionResult Converter::convert(const QImage& image, QObject* rec
 	}
 }	// convert
 
-Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QObject* receiver) const
+Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QObject* receiver)
 {
-	return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
-}
+	try
+	{
+		// Resize the input image to the size expected by the generator
+		// Discard the alpha channel (the image will be stored using a 24-bit RGB format (8-8-8));
+		// it looks like the color order is swapped without this function
+		QImage resizedImage = image->scaled(this->inputImageSize, this->inputImageSize, Qt::IgnoreAspectRatio, Qt::SmoothTransformation)
+			.convertToFormat(QImage::Format_RGB888);
+
+		at::Tensor inputTensor = torch::from_blob(resizedImage.bits()	// shared pixel data (does not perform a deep copy)
+			, at::IntList({ 1, this->inputImageSize, this->inputImageSize, 3 })	// input shape
+			, torch::TensorOptions().dtype(torch::kByte)	// data type of the elements stored in the tensor
+		);
+
+		inputTensor = inputTensor.toType(torch::kFloat);
+
+		// Scale to [-1; +1]
+		constexpr double maxPixel = +1, minPixel = -1;
+		inputTensor.mul_((maxPixel - minPixel) / 255.0).add_(minPixel);
+
+		// Convert the channel order BHWC -> BCHW
+		inputTensor = inputTensor.permute({ 0, 3, 1, 2 });
+
+		// Create the input vector from the scaled image tensor
+		std::vector<torch::jit::IValue> inputs({ inputTensor });
+
+		// Pass the input vector to the generator and get the output as IValue 
+		// (a tagged union over the types supported by the TorchScript interpreter)
+		c10::IValue outputIV = this->module.forward(inputs);
+
+		// Convert the interpreter value to a Torch tensor
+		torch::Tensor outputTensor = outputIV.toTensor();
+
+		outputTensor = outputTensor.permute({ 0, 2, 3, 1 });		// BCHW -> BHWC
+
+		std::cout << outputTensor.sizes() << std::endl;
+
+		// Scale the output tensor to [0; 255]
+		outputTensor = outputTensor.add_(-minPixel).mul_(255.0 / (maxPixel - minPixel)).clamp_(0, 255).toType(torch::kU8);
+
+		// Convert the output tensor data to a Qt image
+		uchar* tensorData = new uchar[outputTensor.nbytes()];
+		std::memcpy(tensorData, static_cast<uchar*>(outputTensor.data_ptr()), outputTensor.nbytes());
+		QImage outputImage(tensorData
+			, outputTensor.size(2)	// width
+			, outputTensor.size(1)	// height
+			, outputTensor.size(2) * outputTensor.size(3) * outputTensor.itemsize()		// width*channels*item
+			, QImage::Format_RGB888	// format
+			, imageCleanup	// QImage's destructor doesn't delete the data automatically
+			, tensorData);
+
+		if (outputImage.isNull())
+		{
+			// Free memory here since the output image's cleanup handler is not called for an uninitialized image
+			delete[] tensorData;
+			throw std::exception("Failed to create an image from the output tensor data.");
+		}
+
+		return std::make_tuple(outputImage, receiver, tr("OK."));
+	}	// try
+	catch (const std::exception& e)
+	{
+		return std::make_tuple(QImage(), receiver, tr("Conversion failed: not implemented."));
+	}
+}	// convert
 
 //Converter::ConversionResult Converter::convert(QImage image, QObject* receiver) const
 //{
