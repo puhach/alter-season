@@ -54,6 +54,9 @@ private:
 	ConversionResult convert(std::shared_ptr<QImage> image, QObject *receiver);
 	//ConversionResult convert(QImage &&image, QObject *receiver) const;
 
+	QImage convertResized(QImage &&image);
+	//QImage convertBits();
+
 	bool clearFinishedFutures();
 
 	Converter& operator = (const Converter& other) = delete;
