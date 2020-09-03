@@ -32,16 +32,18 @@ Converter::Converter(const std::string &modulePath)
 		});
 }
 
-QImage Converter::convert(const QImage& image) const
+QImage Converter::convertSync(const QImage& image, QString *errorString) 
 {
-	// TODO: not implemented
+	auto [img, receiver, error] = convert(image, nullptr);
+	
+	if (errorString)
+		*errorString = error;
 
-	return QImage();
-}
+	return img;
+}	// convert
 
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
-	// TODO: do we need it?
 	this->busy = true;
 		
 	clearFinishedFutures();	// release memory occupied by finished futures and associated data

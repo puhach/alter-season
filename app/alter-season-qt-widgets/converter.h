@@ -39,7 +39,7 @@ public:
 
 	bool isBusy() const { return busy; }
 
-	QImage convert(const QImage &image) const;
+	QImage convertSync(const QImage &image, QString *errorString = nullptr);
 
 	void convertAsync(const QImage &image, QObject *receiver);
 	void convertAsync(QImage &&image, QObject *receiver);
