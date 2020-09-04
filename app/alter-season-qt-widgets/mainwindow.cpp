@@ -147,7 +147,6 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			}	// failed to load the image
 			else
 			{
-				// TODO: consider using move semantics
 				this->imageArea->showImage(image);
 				this->adjustSize();
 				
@@ -161,7 +160,7 @@ void MainWindow::dropEvent(QDropEvent* evt)
 					//this->converterS2W->convertAsync(image, this);
 					{
 						QString error;
-						auto res = this->converterS2W->convertSync(image, &error);
+						auto res = this->converterS2W->convertSync(std::move(image), &error);
 						qDebug() << res.size() << res.isNull();
 					}
 					break;
@@ -215,6 +214,7 @@ bool MainWindow::event(QEvent* e)
 			this->imageArea->showMessage(conversionFinishedEvt->getError(), 2000);
 		else
 		{
+			// TODO: consider using move semantics
 			this->imageArea->showImage(image);
 		}
 

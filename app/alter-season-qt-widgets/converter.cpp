@@ -34,12 +34,22 @@ Converter::Converter(const std::string &modulePath)
 
 QImage Converter::convertSync(const QImage& image, QString *errorString) 
 {
-	auto [img, receiver, error] = convert(image, nullptr);
+	const auto & [outputImage, receiver, error] = convert(image, nullptr);
 	
 	if (errorString)
 		*errorString = error;
 
-	return img;
+	return outputImage;
+}	// convert
+
+QImage Converter::convertSync(QImage&& image, QString* errorString)
+{
+	const auto& [outputImage, receiver, error] = convert(std::make_shared<QImage>(std::move(image)), nullptr);
+
+	if (errorString)
+		*errorString = error;
+
+	return outputImage;
 }	// convert
 
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
