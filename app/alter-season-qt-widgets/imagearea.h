@@ -15,7 +15,7 @@ public:
 
 	void showMessage(const QString& message, int duration);
 	void showImage(const QImage &image);
-
+	void showImage(QImage &&image);
 	//virtual QSize sizeHint() const;
 
 

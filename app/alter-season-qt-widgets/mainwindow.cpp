@@ -155,14 +155,7 @@ void MainWindow::dropEvent(QDropEvent* evt)
 				{
 				case ConversionSelectorDlg::Summer2Winter:
 					qDebug() << "Conversion from summer to winter selected";
-					//this->imageArea->showImage(this->converterS2W->convert(image));
-					// !TEST
-					//this->converterS2W->convertAsync(image, this);
-					{
-						QString error;
-						auto res = this->converterS2W->convertSync(std::move(image), &error);
-						qDebug() << res.size() << res.isNull();
-					}
+					this->converterS2W->convertAsync(std::move(image), this);					
 					break;
 					
 				case ConversionSelectorDlg::Winter2Summer:
@@ -209,13 +202,14 @@ bool MainWindow::event(QEvent* e)
 	{
 		ConversionFinishedEvent* conversionFinishedEvt = static_cast<ConversionFinishedEvent*>(e);
 		
-		const QImage &image = conversionFinishedEvt->getImage();
+		QImage&& image = conversionFinishedEvt->getImage();
+		//const QImage &image = conversionFinishedEvt->getImage();
 		if (image.isNull())
 			this->imageArea->showMessage(conversionFinishedEvt->getError(), 2000);
 		else
 		{
-			// TODO: consider using move semantics
-			this->imageArea->showImage(image);
+			//this->imageArea->showImage(image);
+			this->imageArea->showImage(std::move(image));
 		}
 
 		this->imageArea->adjustSize();

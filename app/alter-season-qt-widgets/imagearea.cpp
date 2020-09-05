@@ -48,6 +48,12 @@ void ImageArea::showImage(const QImage& image)
 	this->messageTimer.stop();
 }
 
+void ImageArea::showImage(QImage&& image)
+{
+	this->setPixmap(QPixmap::fromImage(std::move(image)));
+	this->messageTimer.stop();
+}
+
 //void ImageArea::dragEnterEvent(QDragEnterEvent* event)
 //{
 //	event->acceptProposedAction();
