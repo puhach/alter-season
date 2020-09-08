@@ -29,3 +29,12 @@ In CMakeSettings.json set Torch_DIR variable to the path to extracted LibTorch l
 When adding a release configuration, configurationType is set to "RelWithDebInfo" by default. It seems to be incompatible with release version of LibTorch. Change configurationType to "Release" or use the debug version of LibTorch. 
 
 
+
+## Usage
+
+The program takes in two command line arguments: the path to the script module and the input image. 
+
+For example, to convert a summer picture summer2.jpg to winter by means of the summer_to_winter_torch14_256x256_00100.sm module, run this command:
+```
+alter-season-cli.exe path/to/module/summer_to_winter_torch14_256x256_00100.sm path/to/image/summer2.jpg 
+```
