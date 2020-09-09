@@ -38,3 +38,8 @@ For example, to convert a summer picture summer2.jpg to winter by means of the s
 ```
 alter-season-cli.exe path/to/module/summer_to_winter_torch14_256x256_00100.sm path/to/image/summer2.jpg 
 ```
+
+## Credits
+
+
+This project is based on the "Loading a TorchScript Model in C++" [tutorial](https://pytorch.org/tutorials/advanced/cpp_export.html).
