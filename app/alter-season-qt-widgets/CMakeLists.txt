@@ -10,7 +10,7 @@ if(CMAKE_VERSION VERSION_LESS "3.7.0")
     set(CMAKE_INCLUDE_CURRENT_DIR ON)
 endif()
 
-find_package(Qt5 COMPONENTS Widgets REQUIRED)
+find_package(Qt5 COMPONENTS Widgets REQUIRED Concurrent REQUIRED)
 
 
 #if(CMAKE_BUILD_TYPE STREQUAL "Release")
@@ -53,7 +53,7 @@ add_executable(alter-season-qt-widgets
 # https://stackoverflow.com/questions/8249028/how-do-i-keep-my-qt-c-program-from-opening-a-console-in-windows
 #if(CMAKE_BUILD_TYPE STREQUAL "Release")
     set_target_properties(alter-season-qt-widgets PROPERTIES 
-        WIN32_EXECUTABLE true
+        #WIN32_EXECUTABLE true
         CXX_STANDARD 17
         VS_DEBUGGER_WORKING_DIRECTORY "$<TARGET_FILE_DIR:alter-season-qt-widgets>"
         )
@@ -87,6 +87,6 @@ if (MSVC)
 endif (MSVC)
 
 
-target_link_libraries(alter-season-qt-widgets Qt5::Widgets)
+target_link_libraries(alter-season-qt-widgets Qt5::Widgets Qt5::Concurrent)
 target_link_libraries(alter-season-qt-widgets "${OpenCV_LIBS}" "${TORCH_LIBRARIES}")
 
