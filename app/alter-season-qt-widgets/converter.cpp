@@ -1,9 +1,8 @@
 #include "converter.h"
 #include "conversionfinishedevt.h"
 //#include <torch/script.h>
-#include <opencv2/core.hpp>
-#include <opencv2/highgui.hpp>	// TEST!
-#include <opencv2/imgproc.hpp>
+//#include <opencv2/core.hpp>
+//#include <opencv2/imgproc.hpp>
 
 #include <QApplication>
 #include <QtConcurrent>

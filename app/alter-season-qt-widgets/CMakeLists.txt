@@ -23,7 +23,7 @@ find_package(Qt5 COMPONENTS Widgets REQUIRED Concurrent REQUIRED)
 find_package(Torch REQUIRED)
 
 
-find_package(OpenCV REQUIRED)
+#find_package(OpenCV REQUIRED)
 
 
 
@@ -88,5 +88,5 @@ endif (MSVC)
 
 
 target_link_libraries(alter-season-qt-widgets Qt5::Widgets Qt5::Concurrent)
-target_link_libraries(alter-season-qt-widgets "${OpenCV_LIBS}" "${TORCH_LIBRARIES}")
-
+#target_link_libraries(alter-season-qt-widgets "${OpenCV_LIBS}" "${TORCH_LIBRARIES}")
+target_link_libraries(alter-season-qt-widgets "${TORCH_LIBRARIES}")
