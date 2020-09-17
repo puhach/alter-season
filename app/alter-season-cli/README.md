@@ -7,6 +7,18 @@ Refer to [this](../../model/README.md) project in case you are interested in mod
 
 ## Project Set Up
 
+Download and install [Git extension for versioning large files](https://git-lfs.github.com/). On Linux with the packagecloud repository configured for your system, you can install Git LFS from the command line:  
+```
+sudo apt-get install git-lfs
+```
+
+Then set up Git LFS:
+```
+git lfs install
+```
+
+Once it is done, clone [this](https://github.com/puhach/alter-season.git) repository.
+
 Download LibTorch. The version used for development is 1.4.
 
 LibTorch 1.4 CPU (debug):
