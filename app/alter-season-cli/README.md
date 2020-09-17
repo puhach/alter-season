@@ -21,17 +21,24 @@ Once it is done, clone [this](https://github.com/puhach/alter-season.git) reposi
 
 Download LibTorch. The version used for development is 1.4.
 
-LibTorch 1.4 CPU (debug):
+LibTorch 1.4 CPU for Windows (Debug):
 https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-debug-1.4.0.zip
 
-LibTorch 1.4 CPU (release):
+LibTorch 1.4 CPU for Windows (Release):
 https://download.pytorch.org/libtorch/cpu/libtorch-win-shared-with-deps-1.4.0.zip
 
-LibTorch 1.4 with CUDA 10.1 (debug):
+LibTorch 1.4 with CUDA 10.1 for Windows (Debug):
 https://download.pytorch.org/libtorch/cu101/libtorch-win-shared-with-deps-debug-1.4.0.zip
 
-LibTorch 1.4 with CUDA 10.1 (release):
+LibTorch 1.4 with CUDA 10.1 for Windows (Release):
 https://download.pytorch.org/libtorch/cu101/libtorch-win-shared-with-deps-1.4.0.zip
+
+LibTorch 1.4 CPU for Linux (C++11 ABI):
+https://download.pytorch.org/libtorch/cpu/libtorch-cxx11-abi-shared-with-deps-1.4.0%2Bcpu.zip
+
+LibTorch 1.4 with CUDA 10.1 for Linux (C++11 ABI):
+https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-1.4.0.zip
+
 
 
 Extract LibTorch. 
