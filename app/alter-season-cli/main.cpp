@@ -55,7 +55,7 @@ int main(int argc, const char* argv[])
 		// Read the input image
 		cv::Mat inputImg = cv::imread(imagePath, cv::IMREAD_COLOR);
 		if (inputImg.empty())
-			throw std::exception("Failed to read the input image.");
+			throw std::runtime_error("Failed to read the input image.");
 
 		//cv::imshow("input", inputImg);
 
