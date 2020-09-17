@@ -43,9 +43,21 @@ https://download.pytorch.org/libtorch/cu101/libtorch-cxx11-abi-shared-with-deps-
 
 Extract LibTorch. 
 
-In CMakeSettings.json set Torch_DIR variable to the path to extracted LibTorch library. 
+Specify paths to LibTorch and OpenCV cmake files in Torch_DIR and OpenCV_DIR variables respectively. Then generate build files, e.g.:
+```
+mkdir build
+cd build
+cmake .. -DTorch_DIR=/opt/libtorch-1.4-cpu/share/cmake/Torch -DOpenCV_DIR=/opt/opencv/4.4.0/installation/lib/cmake/opencv4
+```
 
-When adding a release configuration, configurationType is set to "RelWithDebInfo" by default. It seems to be incompatible with release version of LibTorch. Change configurationType to "Release" or use the debug version of LibTorch. 
+According to PyTorch guidelines, the path has to be absolute.
+
+Now everything is ready to build the project:
+```
+cmake --build . --config Release
+```
+
+When you are on Windows using Visual Studio, you can Torch_DIR and OpenCV_DIR in CMakeSettings.json. When adding a release configuration, configurationType is set to "RelWithDebInfo" by default. It seems to be incompatible with release version of LibTorch. Change configurationType to "Release" or use the debug version of LibTorch. 
 
 
 
