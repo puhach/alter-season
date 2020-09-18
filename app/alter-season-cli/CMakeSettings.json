@@ -13,6 +13,7 @@
       "variables": [
         {
           "name": "Torch_DIR",
+          //"value": "D:/dox/projects/AI/alter-season-cyclegan/app/common/libtorch-1.4-cpu-release/share/cmake/Torch",
           "value": "D:/dox/projects/AI/alter-season-cyclegan/app/common/libtorch-1.4-cpu-release",
           "type": "PATH"
         }
@@ -32,6 +33,7 @@
       "variables": [
         {
           "name": "Torch_DIR",
+          //"value": "D:\\dox\\projects\\AI\\alter-season-cyclegan\\app\\common\\libtorch-1.4-cpu-debug\\share\\cmake\\Torch",
           "value": "D:\\dox\\projects\\AI\\alter-season-cyclegan\\app\\common\\libtorch-1.4-cpu-debug",
           "type": "PATH"
         }
