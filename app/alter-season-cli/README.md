@@ -57,6 +57,8 @@ Now everything is ready to build the project:
 cmake --build . --config Release
 ```
 
+Build configuration type should match the LibTorch version (debug or release) which is used.
+
 When you are on Windows using Visual Studio, you can Torch_DIR and OpenCV_DIR in CMakeSettings.json. When adding a release configuration, configurationType is set to "RelWithDebInfo" by default. It seems to be incompatible with release version of LibTorch. Change configurationType to "Release" or use the debug version of LibTorch. 
 
 
