@@ -24,10 +24,13 @@ Install imageio:
 pip install imageio
 ```
 
-Clode the alter-season repo:
+Clone the alter-season repo:
 ```
 git clone https://github.com/puhach/alter-season.git
 ```
+
+Before cloning make sure that Git LFS is installed.
+
 
 Download the [dataset](https://video.udacity-data.com/topher/2018/November/5be66e78_summer2winter-yosemite/summer2winter-yosemite.zip).
 
