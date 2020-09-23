@@ -3,10 +3,6 @@
 #include <QApplication>
 #include <QMessageBox>
 
-//#include <iostream>
-//
-//#include <QDir>	// TEST!
-//#include <QDebug>
 
 int main(int argc, char *argv[])
 {
@@ -27,10 +23,7 @@ int main(int argc, char *argv[])
 	}
 	catch (const std::exception& e)
 	{
-		//qDebug() << QDir::currentPath();
-		//qDebug() << e.what();
 		QMessageBox::critical(nullptr, QObject::tr("Error"), QString::fromStdString(e.what()));
-		//std::cerr << e.what() << std::endl;
 		return -1;
 	}
 }

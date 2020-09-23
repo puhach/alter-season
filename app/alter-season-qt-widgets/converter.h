@@ -25,7 +25,6 @@
 
 class Converter: public QObject
 {
-	/// TODO: Do we really need it with lambdas?
 	//Q_OBJECT
 
 public:
@@ -56,7 +55,6 @@ private:
 	//ConversionResult convert(QImage &&image, QObject *receiver) const;
 
 	QImage convertResized(QImage &&image);
-	//QImage convertBits();
 
 	bool clearFinishedFutures();
 

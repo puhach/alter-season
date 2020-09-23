@@ -1,9 +1,6 @@
 #include "imagearea.h"
 
 #include <QImage>
-//#include <QDragEnterEvent>
-//#include <QDropEvent>
-//#include <QMimeData>
 #include <QDebug>
 
 ImageArea::ImageArea(const QString &inscription, QWidget* parent)

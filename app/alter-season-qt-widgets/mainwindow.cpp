@@ -12,8 +12,6 @@
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QFileInfo>
-//#include <QTimer>	// TEST!
-//#include <QFontMetrics>
 #include <QDebug>
 
 //inline QLatin1String operator""_QL1(const char* str, std::size_t len)
@@ -44,22 +42,6 @@ MainWindow::MainWindow()
 	this->scrollArea->setWidget(this->imageArea);
 	this->scrollArea->setWidgetResizable(true);
 	setCentralWidget(this->scrollArea);
-
-	//setMinimumSize(500, 500);
-	//QRect imrect = this->imageArea->contentsRect();
-	//QFontMetrics fontMetrics = this->imageArea->fontMetrics();
-	//auto brect = fontMetrics.boundingRect(imrect, Qt::AlignCenter | Qt::TextWordWrap, this->imageArea->text());
-	//auto sz1 = fontMetrics.size(Qt::TextSingleLine, this->imageArea->text());
-	//int sz = sz1.width();
-
-	/// TODO: consider using sizeHint instead
-	//int sz = qMax(this->imageArea->sizeHint().width(), this->imageArea->sizeHint().height()) + 10;	// bigger image side + some padding
-	//QSize winSize = QSize(sz, sz).grownBy(this->contentsMargins() + this->scrollArea->contentsMargins() + this->imageArea->contentsMargins());
-	////qDebug() << this->imageArea->sizeHint() << this->scrollArea->contentsMargins() << this->imageArea->contentsMargins() << this->contentsMargins();
-	//resize(winSize);
-	//setWindowFlags(windowFlags() | Qt::MSWindowsFixedSizeDialogHint);	
-
-	//this->converter = std::make_unique<Converter>(QApplication::applicationDirPath() + "/" + );
 }
 
 // The compiler needs the definition of Converter to generate the default destructor for the enclosing class (MainWindow). 
@@ -109,10 +91,8 @@ QSize MainWindow::sizeHint() const
 
 void MainWindow::dragEnterEvent(QDragEnterEvent* evt)
 {
-	//throw std::exception("My exception");
-
 	const QMimeData* mimeData = evt->mimeData();
-	//if (mimeData->hasUrls() && mimeData->urls().first().end)
+
 	for (const QUrl& url : mimeData->urls())
 	{
 		if (isImageFile(url.toLocalFile()))
@@ -140,7 +120,6 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			QImage image(localFilePath);
 			if (image.isNull())
 			{
-				//this->resize(this->defaultSize);
 				this->imageArea->showMessage(tr("Failed to load the image"), 2000);				
 				this->adjustSize();
 				QApplication::beep();				
@@ -160,8 +139,6 @@ void MainWindow::dropEvent(QDropEvent* evt)
 					
 				case ConversionSelectorDlg::Winter2Summer:
 					qDebug() << "Conversion from winter to summer selected";
-					///this->imageArea->showImage(this->converterW2S->convert(image));
-					//this->converterW2S->convertAsync(image, this);
 					this->converterW2S->convertAsync(std::move(image), this);
 					break;
 
@@ -170,8 +147,6 @@ void MainWindow::dropEvent(QDropEvent* evt)
 				}	// switch
 
 			}	// image loaded successfully
-
-			//this->adjustSize();
 
 			return evt->accept();
 		}	//	image file
@@ -204,12 +179,15 @@ bool MainWindow::event(QEvent* e)
 		
 		QImage&& image = conversionFinishedEvt->getImage();
 		//const QImage &image = conversionFinishedEvt->getImage();
+
 		if (image.isNull())
 			this->imageArea->showMessage(conversionFinishedEvt->getError(), 2000);
 		else
 		{
 			//this->imageArea->showImage(image);
 			this->imageArea->showImage(std::move(image));
+
+			// TODO: save image
 		}
 
 		this->imageArea->adjustSize();

@@ -1,7 +1,6 @@
 #include "conversionselectordlg.h"
 
 #include <QVBoxLayout>
-//#include <QPushButton>
 #include <QCommandLinkButton>
 
 ConversionSelectorDlg::ConversionSelectorDlg(QWidget* parent)
