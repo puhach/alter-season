@@ -5,6 +5,11 @@
 #include <QApplication>
 #include <QtConcurrent>
 
+
+
+// Since constructor overloads are very similar we can use delegating constructors to avoid repetition 
+// and accidental differences
+
 Converter::Converter(const QString &modulePath): Converter(modulePath.toStdString()) {}
 
 Converter::Converter(const char* modulePath) : Converter(std::string(modulePath)) {}
@@ -13,13 +18,14 @@ Converter::Converter(const std::string &modulePath)
 	: QObject()
 	, module(torch::jit::load(modulePath))
 	, inputImageSize(module.attr("image_size").toInt())
-	, busy(false)
+	//, busy(false)
 {
 	if (this->inputImageSize <= 0)
 		throw std::runtime_error("Failed to obtain the input image size.");
-
+	
 	this->futureSynchronizer.setCancelOnWait(true);
 	
+	// When conversion completes, we need to notify the receiver and send the results
 	connect(&this->futureWatcher, &QFutureWatcher<QImage>::finished, this, [this] {
 			if (!this->futureWatcher.isCanceled())
 			{
@@ -28,6 +34,7 @@ Converter::Converter(const std::string &modulePath)
 			}
 		});
 }
+
 
 QImage Converter::convertSync(const QImage& image, QString *errorString) 
 {
@@ -49,9 +56,10 @@ QImage Converter::convertSync(QImage&& image, QString* errorString)
 	return outputImage;
 }	// convert
 
+
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
-	this->busy = true;
+	//this->busy = true;
 		
 	clearFinishedFutures();	// release memory occupied by finished futures and associated data
 	
@@ -70,12 +78,12 @@ void Converter::convertAsync(const QImage& image, QObject* receiver)
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
 
-	this->busy = false;
+	//this->busy = false;
 }	// convertAsync
 
 void Converter::convertAsync(QImage&& image, QObject* receiver)
 {
-	this->busy = true;
+	//this->busy = true;
 
 	clearFinishedFutures();	// release memory occupied by finished futures and associated data
 
@@ -87,7 +95,7 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);
 
-	this->busy = false;
+	//this->busy = false;
 }
 
 void imageCleanup(void* info)
@@ -135,6 +143,7 @@ Converter::ConversionResult Converter::convert(std::shared_ptr<QImage> image, QO
 		return std::make_tuple(QImage(), receiver, e.what());
 	}
 }	// convert
+
 
 QImage Converter::convertResized(QImage&& image)
 {
@@ -196,12 +205,10 @@ QImage Converter::convertResized(QImage&& image)
 		throw std::exception("Failed to create an image from the output tensor data.");
 	}
 
-	//return std::make_tuple(outputImage, receiver, tr("OK."));
 	return outputImage;
 }	// convertResized
 
-// This function helps to release memory occupied by finished futures and associated image data.
-// Returns true if futures were removed and false otherwise.
+
 bool Converter::clearFinishedFutures()
 {
 	const auto& futures = this->futureSynchronizer.futures();
@@ -212,6 +219,7 @@ bool Converter::clearFinishedFutures()
 	}
 	else return false;
 }	// clearFinishedFutures
+
 
 void Converter::cancel()
 {
