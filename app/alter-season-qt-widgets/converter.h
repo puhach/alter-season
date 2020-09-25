@@ -84,7 +84,6 @@ private:
 
 	torch::jit::script::Module module;
 	int inputImageSize;
-	//bool busy;
 	QFutureWatcher<ConversionResult> futureWatcher;		// signals about asynchronous conversion completion
 	QFutureSynchronizer<ConversionResult> futureSynchronizer;	// ensures that a Converter instance lives until all conversions are done
 };	//	Converter

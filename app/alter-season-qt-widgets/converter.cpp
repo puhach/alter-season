@@ -18,7 +18,6 @@ Converter::Converter(const std::string &modulePath)
 	: QObject()
 	, module(torch::jit::load(modulePath))
 	, inputImageSize(module.attr("image_size").toInt())
-	//, busy(false)
 {
 	if (this->inputImageSize <= 0)
 		throw std::runtime_error("Failed to obtain the input image size.");
@@ -59,8 +58,6 @@ QImage Converter::convertSync(QImage&& image, QString* errorString)
 
 void Converter::convertAsync(const QImage& image, QObject* receiver) 
 {
-	//this->busy = true;
-		
 	clearFinishedFutures();	// release memory occupied by finished futures and associated data
 	
 
@@ -77,14 +74,10 @@ void Converter::convertAsync(const QImage& image, QObject* receiver)
 
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);	// even if this future gets replaced, we still have to wait for it
-
-	//this->busy = false;
 }	// convertAsync
 
 void Converter::convertAsync(QImage&& image, QObject* receiver)
 {
-	//this->busy = true;
-
 	clearFinishedFutures();	// release memory occupied by finished futures and associated data
 
 	const auto& future = QtConcurrent::run(this
@@ -94,8 +87,6 @@ void Converter::convertAsync(QImage&& image, QObject* receiver)
 
 	this->futureWatcher.setFuture(future);
 	this->futureSynchronizer.addFuture(future);
-
-	//this->busy = false;
 }
 
 void imageCleanup(void* info)
