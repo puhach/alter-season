@@ -16,8 +16,6 @@ ImageArea::ImageArea(const QString &inscription, QWidget* parent)
 	this->messageTimer.setSingleShot(true);
 	connect(&this->messageTimer, &QTimer::timeout, this, [this] {
 			setText(this->inscription);
-			//adjustSize();
-			//qDebug() << this->sizeHint();
 		});
 }
 

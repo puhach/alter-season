@@ -16,15 +16,15 @@ class MainWindow : public QMainWindow
 	Q_OBJECT
 
 public:
+
 	MainWindow();
 	~MainWindow();
 	
 protected:
-	virtual void dragEnterEvent(QDragEnterEvent *evt);
-	//virtual void dragMoveEvent(QDragMoveEvent *evt);
-	virtual void dropEvent(QDropEvent *evt);
 
-	virtual void mouseReleaseEvent(QMouseEvent *evt);
+	virtual void dragEnterEvent(QDragEnterEvent *evt);
+
+	virtual void dropEvent(QDropEvent *evt);
 
 	virtual QSize sizeHint() const;
 
@@ -38,7 +38,6 @@ private:
 	std::unique_ptr<Converter> converterS2W, converterW2S;
 	QScrollArea *scrollArea;
 	ImageArea* imageArea;
-	//QSize defaultSize;
 };	// MainWindow
 
 
