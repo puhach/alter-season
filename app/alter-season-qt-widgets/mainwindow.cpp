@@ -69,20 +69,28 @@ QSize MainWindow::sizeHint() const
 
 		auto bestSize = [&square](const QFontMetrics& fontMetrics, const QString& text) -> QSize
 		{
+			// First, estimate the text size as a square of the same area as the single line text rectangle
 			QSize textSize = fontMetrics.size(Qt::TextSingleLine, text);
 			int squareSizeGuess = static_cast<int>(sqrt(square(textSize)));
-			//int squareSizeGuess = static_cast<int>(sqrt(this->imageArea->width() * this->imageArea->height()));
+
+			// Second, find the bounding rectangle of the text as if drawn within the estimated square
 			QRect textRect = fontMetrics.boundingRect(0, 0, squareSizeGuess, squareSizeGuess, Qt::AlignCenter | Qt::TextWordWrap, text);
+
+			// Increase the size of the square to fit the bounding rectangle
 			int squareSize = qMax(textRect.width(), textRect.height()) + 10;	// larger side + some padding
+
 			return QSize(squareSize, squareSize);
 		};
 
+		// Make sure that the text square is large enough for both the message and the inscription
 		QFontMetrics fontMetrics = this->imageArea->fontMetrics();
 		QSize messageSize = bestSize(fontMetrics, this->imageArea->text());
 		QSize inscriptionSize = bestSize(fontMetrics, this->imageArea->getInscription());
 		return square(messageSize) > square(inscriptionSize) ? messageSize : inscriptionSize;
 	}	// no pixmap
 	
+	// TODO: move this code to the pixmap branch since it doesn't seem to be reachable by "else"
+	// In case a large image is loaded, make sure that the window doesn't occupy too much space
 	if (winSize.height() > desktopSize.height() / 2 || winSize.width() > desktopSize.width() / 2)
 		winSize.scale(desktopSize / 2, Qt::KeepAspectRatio);
 
@@ -118,6 +126,7 @@ void MainWindow::dropEvent(QDropEvent* evt)
 			this->converterW2S->cancel();
 
 			QImage image(localFilePath);
+
 			if (image.isNull())
 			{
 				this->imageArea->showMessage(tr("Failed to load the image"), 2000);				
@@ -155,10 +164,6 @@ void MainWindow::dropEvent(QDropEvent* evt)
 	evt->ignore();
 }
 
-void MainWindow::mouseReleaseEvent(QMouseEvent* evt)
-{
-	qDebug() << this->imageArea->size();
-}
 
 bool MainWindow::isImageFile(const QString &fileName) const
 {
@@ -175,6 +180,8 @@ bool MainWindow::event(QEvent* e)
 {
 	if (e->type() == ConversionFinishedEvent::ConversionFinishedEventType)
 	{
+		// When conversion completes we can show the output image to a user
+
 		ConversionFinishedEvent* conversionFinishedEvt = static_cast<ConversionFinishedEvent*>(e);
 		
 		QImage&& image = conversionFinishedEvt->getImage();
@@ -192,7 +199,7 @@ bool MainWindow::event(QEvent* e)
 
 		this->imageArea->adjustSize();
 
-		// This virtual function receives events to an object and should return true if the event e was recognized and processed.
+		// This virtual function receives events to an object and should return true if the event e was recognized and processed
 		return true;
 	}
 	else return QMainWindow::event(e);
