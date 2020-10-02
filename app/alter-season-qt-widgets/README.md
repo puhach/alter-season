@@ -1,5 +1,7 @@
 # Alter Season GUI
 
+![cover](./assets/cover.png)
+
 This project implements a Qt GUI application which uses a CycleGAN model for image conversion. 
 
 Refer to [this](../../model/README.md) project in case you are interested in model implementation itself.
@@ -23,3 +25,5 @@ cmake.exe .. -DCMAKE_PREFIX_PATH="C:\Qt\5.14.2\5.14.2\msvc2017_64;D:/dox/project
 ```
 
 Make sure that LibTorch path matches the build configuration.
+
+
