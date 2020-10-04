@@ -27,3 +27,17 @@ cmake.exe .. -DCMAKE_PREFIX_PATH="C:\Qt\5.14.2\5.14.2\msvc2017_64;D:/dox/project
 Make sure that LibTorch path matches the build configuration.
 
 
+## Usage
+
+1. Drag and drop the original image to the application window.
+
+![main window](./assets/original.png)
+
+
+2. Choose the type of conversion: "Summer to Winter" or "Winter to Summer".
+
+![conversion type](./assets/command.png)
+
+3. Enjoy :)
+
+![converted image](./assets/converted.png)
